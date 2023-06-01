@@ -7,6 +7,19 @@
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 
+    <!-- Strings used for fragments for navigation -->
+    <string name="button_take_picture">TAKE PICTURE</string>
+
+    <string name="permission_camera_title">Camera</string>
+    <string name="permission_camera_rationale">Access to the camera is needed for detection</string>
+    <string name="no_camera_permission">This application cannot run because it does not have the camera permission.  The application will now exit.</string>
+    <string name="camera_error">This device doesn\'t support Camera2 API.</string>
+    <string name="button_go_back">Go Back</string>
+    <string name="button_go_settings">Go to Settings</string>
+
+    <string name="enable_autofocus">Autofocus On</string>
+    <string name="disable_autofocus">Autofocus Off</string>
+
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
         volutpat, dolor id interdum ullamcorper, risus dolor egestas lectus, sit amet mattis purus

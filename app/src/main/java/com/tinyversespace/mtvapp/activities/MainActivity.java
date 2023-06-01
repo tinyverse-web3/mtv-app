@@ -1,4 +1,4 @@
-package com.tinyversespace.mtvapp;
+package com.tinyversespace.mtvapp.activities;
 
 import android.app.Activity;
 import android.os.Build;
@@ -16,6 +16,8 @@ import android.widget.Toast;
 
 import com.core.web.JsBridgeWebView;
 import com.core.web.base.BaseWebViewClient;
+import com.tinyversespace.mtvapp.jsbridge.JsCallMtv;
+import com.tinyversespace.mtvapp.R;
 //import helloworld.Hello;
 
 public class MainActivity extends Activity {
@@ -33,14 +35,15 @@ public class MainActivity extends Activity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         //去掉标题栏
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.webview);
+        setContentView(R.layout.activity_main_webview);
 
         bar = (ProgressBar) findViewById(R.id.progressBar1);
         webView = (JsBridgeWebView) findViewById(R.id.webView);
         //在此处添加提供给JS调用的接口，可以添加多个接口类每增加一个接口类：webView.addJavascriptInterface(new ToJSAPIClass(this))；
         //可以添加多行；
-        webView.addJavascriptInterface(new JsCallMtvExample(this));
-        String url = "https://mtv.tinyverse.space/";
+        JsCallMtv jsCallMtv = new JsCallMtv(this);
+        webView.addJavascriptInterface(jsCallMtv);
+        String url = "https://mtv.tinyverse.space/test.html";
         loadUrl(url);
 
         //String

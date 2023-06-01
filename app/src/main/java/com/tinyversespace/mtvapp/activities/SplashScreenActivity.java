@@ -1,4 +1,4 @@
-package com.tinyversespace.mtvapp;
+package com.tinyversespace.mtvapp.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,6 +6,8 @@ import android.os.Handler;
 import android.os.Looper;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.tinyversespace.mtvapp.R;
 
 public class SplashScreenActivity extends AppCompatActivity {
 
