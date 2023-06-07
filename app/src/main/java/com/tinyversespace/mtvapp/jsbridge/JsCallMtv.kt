@@ -69,10 +69,19 @@ class JsCallMtv(private val context: Context) {
     }
 
 
-
     // 在回调方法中处理返回结果
     fun handleActivityResult(result: String) {
         activityResultCallback?.onResult(result)
+    }
+
+
+    private fun startIpfsActivity(callback: ActivityResultCallback){
+        this.activityResultCallback = callback
+        val intent = Intent(context, FingerprintActivity::class.java)
+        if (context is Activity) {
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            context.startActivityForResult(intent, REQUEST_CODE_SECOND_ACTIVITY)
+        }
     }
 
     companion object {
