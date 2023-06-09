@@ -1,12 +1,17 @@
 package com.tinyversespace.mtvapp.activities
 
+import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ContentValues.TAG
+import android.net.http.SslError
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
+import android.webkit.SslErrorHandler
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
@@ -18,7 +23,7 @@ import com.core.web.base.BaseWebViewClient
 import com.tinyversespace.mtvapp.R
 import com.tinyversespace.mtvapp.jsbridge.JsCallMtv
 
-//import helloworld.Hello;
+
 class MainActivity : Activity() {
     var webView: JsBridgeWebView? = null
     var bar: ProgressBar? = null
@@ -36,11 +41,19 @@ class MainActivity : Activity() {
         setContentView(R.layout.activity_main_webview)
         bar = findViewById<View>(R.id.progressBar1) as ProgressBar
         webView = findViewById<View>(R.id.webView) as JsBridgeWebView
+
+        //设置允许http
+        allowHttp(webView!!)
+
+        //设置允许文件上传
+        allUploadUploadFile(webView!!)
+
         //在此处添加提供给JS调用的接口，可以添加多个接口类每增加一个接口类：webView.addJavascriptInterface(new ToJSAPIClass(this))；
         //可以添加多行；
         val jsCallMtv = JsCallMtv(this)
-        webView!!.addJavascriptInterface(jsCallMtv)
-        val url = "https://mtv.tinyverse.space/test.html"
+        webView!!.addJavascriptInterface(jsCallMtv, "mtv-client")
+        //val url = "https://service.tinyverse.space/test.html"
+        var url = "http://192.168.3.181:5173"
         loadUrl(url)
 
         //String
@@ -73,6 +86,16 @@ class MainActivity : Activity() {
                 webView!!.loadUrl(request.url.toString())
                 return true
             }
+            @SuppressLint("WebViewClientOnReceivedSslError")
+            override fun onReceivedSslError(
+                view: WebView?,
+                handler: SslErrorHandler,
+                error: SslError?
+            ) {
+                Log.d(TAG, "onReceivedSslError!")
+                handler.proceed() // Ignore SSL certificate errors
+            }
+
         }
         //添加进度条
         webView!!.webChromeClient = object : WebChromeClient() {
@@ -96,4 +119,19 @@ class MainActivity : Activity() {
         }
         webView!!.loadUrl(url!!)
     }
+
+    private fun allowHttp(appWebView: JsBridgeWebView){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            appWebView.settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+        }
+        appWebView.settings.allowFileAccessFromFileURLs = true
+        appWebView.settings.allowUniversalAccessFromFileURLs = true
+    }
+
+    private fun allUploadUploadFile(appWebView: JsBridgeWebView){
+        appWebView.settings.allowFileAccess = true
+        appWebView.settings.allowContentAccess = true
+        appWebView.settings.domStorageEnabled = true
+    }
+
 }
