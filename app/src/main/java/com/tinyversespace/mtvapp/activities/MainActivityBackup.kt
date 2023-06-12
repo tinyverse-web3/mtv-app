@@ -2,21 +2,16 @@ package com.tinyversespace.mtvapp.activities
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.ContentValues.TAG
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.net.http.SslError
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.MediaStore
 import android.util.Log
-import android.view.Gravity
 import android.view.KeyEvent
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
 import android.webkit.SslErrorHandler
@@ -25,77 +20,38 @@ import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
-import android.widget.Button
-import android.widget.PopupWindow
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.FileProvider
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.core.web.JsBridgeWebView
 import com.core.web.base.BaseWebViewClient
-import com.tinyversespace.mtvapp.BuildConfig
 import com.tinyversespace.mtvapp.R
 import com.tinyversespace.mtvapp.jsbridge.JsCallMtv
-import java.io.File
-import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivityBackup : AppCompatActivity() {
 
     var webView: JsBridgeWebView? = null
     var bar: ProgressBar? = null
     val mimeType = "text/html"
     val encoding = "utf-8"
     private  var fileChooser: ValueCallback<Array<Uri>>? = null
-    private lateinit var popupWindow: PopupWindow
-    private lateinit var photoFile: File
-    private lateinit var photoUri: Uri
 
-    private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted) {
-                // 权限已授予，执行相机或相册操作
-                showFileChooserDialog()
-            } else {
-                // 权限被拒绝
-                Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-    private val takePictureLauncher =
+    private val fileChooserLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                // 拍照成功，处理照片文件
-                val selectedFiles = arrayOf(photoUri)
-                fileChooser?.onReceiveValue(selectedFiles)
-                fileChooser = null
-            } else {
-                // 用户取消了操作
-                fileChooser?.onReceiveValue(null)
-                fileChooser = null
-            }
-        }
-
-    private val chooseFromGalleryLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                // 从相册选择成功，处理选择的文件
+            if (result.resultCode == RESULT_OK) {
                 val data = result.data
-                val selectedFiles = arrayOf(data?.data!!)
-                fileChooser?.onReceiveValue(selectedFiles)
+                val resultUri = data?.data
+                fileChooser!!.onReceiveValue(arrayOf(resultUri!!))
                 fileChooser = null
             } else {
-                // 用户取消了操作
-                fileChooser?.onReceiveValue(null)
+                fileChooser!!.onReceiveValue(null)
                 fileChooser = null
             }
         }
-
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -183,15 +139,12 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onShowFileChooser(
-                webView: WebView?,
-                filePathCallback: ValueCallback<Array<Uri>>?,
-                fileChooserParams: FileChooserParams?
+                webView: WebView,
+                filePathCallback: ValueCallback<Array<Uri>>,
+                fileChooserParams: FileChooserParams
             ): Boolean {
                 fileChooser = filePathCallback
-
-                // 请求权限
-                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
-
+                showFileChooser()
                 return true
             }
 
@@ -224,6 +177,49 @@ class MainActivity : AppCompatActivity() {
         appWebView.settings.domStorageEnabled = true
     }
 
+    private fun showFileChooser() {
+        if (hasCameraPermission()) {
+            openFileChooser()
+        } else {
+            requestCameraPermission()
+        }
+    }
+
+    private fun openFileChooser() {
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.type = "image/*"
+        fileChooserLauncher.launch(intent)
+    }
+
+    private fun requestCameraPermission() {
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.CAMERA),
+            Companion.PERMISSIONS_REQUEST_CAMERA
+        )
+    }
+
+    private fun hasCameraPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == Companion.PERMISSIONS_REQUEST_CAMERA) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                openFileChooser()
+            } else {
+                // 权限被拒绝
+            }
+        }
+    }
 
     override fun onBackPressed() {
         if (webView!!.canGoBack()) {
@@ -233,62 +229,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showFileChooserDialog() {
-        val view = LayoutInflater.from(this).inflate(R.layout.dialog_file_chooser, null)
-        val btnCamera = view.findViewById<Button>(R.id.btn_camera)
-        val btnGallery = view.findViewById<Button>(R.id.btn_gallery)
-
-        btnCamera.setOnClickListener {
-            // 拍照
-            takePhoto()
-            popupWindow.dismiss()
-        }
-
-        btnGallery.setOnClickListener {
-            // 从相册选择
-            chooseFromGallery()
-            popupWindow.dismiss()
-        }
-
-        popupWindow = PopupWindow(
-            view,
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        popupWindow.isOutsideTouchable = true
-        popupWindow.showAtLocation(webView, Gravity.BOTTOM, 0, 0)
-    }
-
-    private fun takePhoto() {
-        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        if (cameraIntent.resolveActivity(packageManager) != null) {
-            try {
-                photoFile = createImageFile()
-                photoUri = FileProvider.getUriForFile(
-                    this,
-                    BuildConfig.APPLICATION_ID + ".provider",
-                    photoFile
-                )
-                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-                takePictureLauncher.launch(cameraIntent)
-            } catch (ex: IOException) {
-                ex.printStackTrace()
-            }
-        }
-    }
-
-    private fun chooseFromGallery() {
-       // val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        val galleryIntent = Intent(Intent.ACTION_GET_CONTENT)
-        galleryIntent.type = "image/*"
-        chooseFromGalleryLauncher.launch(galleryIntent)
-    }
-
-    private fun createImageFile(): File {
-        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val imageFileName = "IMG_$timeStamp"
-        val storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        return File.createTempFile(imageFileName, ".jpg", storageDir)
+    companion object {
+        private const val PERMISSIONS_REQUEST_CAMERA = 100
+        private const val FILE_CHOOSER_REQUEST_CODE = "file_chooser"
     }
 
 

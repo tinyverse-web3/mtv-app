@@ -17,7 +17,6 @@ import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.net.Uri
 import android.provider.Settings
 import android.widget.Toast
@@ -59,13 +58,11 @@ class SplashScreenActivity : AppCompatActivity() {
         // 创建 Handler 对象
         val handler = Handler(Looper.getMainLooper())
 //        // 延迟 3 秒后跳转到主页面
-//        handler.postDelayed({
-//            val intent = Intent(this@SplashScreenActivity, MainActivity::class.java)
-//            startActivity(intent)
-//            finish()
-//        }, 3000)
-        val intent = Intent(this@SplashScreenActivity, MainActivity::class.java)
-        startActivity(intent)
+        handler.postDelayed({
+            val intent = Intent(this@SplashScreenActivity, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        }, 10000)
     }
 
 
@@ -98,13 +95,15 @@ class SplashScreenActivity : AppCompatActivity() {
                     grantedPermissions.add(permission)
                 }
             }
-            if(grantedPermissions.size == permissions.size) {
+            if (grantedPermissions.size == permissions.size) {
                 return true
             }
         }
         //API >= 30 (android 11)
-        if(Environment.isExternalStorageManager()){   // 检查是否已经设置 ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION 权限
-            return true
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R){
+            if (Environment.isExternalStorageManager()) {   // 检查是否已经设置 ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION 权限
+                return true
+            }
         }
         requestPermission()
         return false
@@ -122,15 +121,17 @@ class SplashScreenActivity : AppCompatActivity() {
                     launchMtvServer()
                 } else {
                     // 用户未授权 MANAGE_EXTERNAL_STORAGE 权限，弹出提示对话框
-                    AlertDialog.Builder(this@SplashScreenActivity)
+                   AlertDialog.Builder(this@SplashScreenActivity)
                         .setTitle("权限请求")
                         .setMessage("需要 MANAGE_EXTERNAL_STORAGE 权限才能正常使用应用，请前往设置授权。")
-                        .setPositiveButton("去授权") { _, _ ->
+                        .setPositiveButton("去授权") { dialog, _ ->
                             // 跳转到应用设置页面
+                            dialog.cancel()
                             authorizeAccessSdcard()
                         }
-                        .setNegativeButton("退出应用") { _, _ ->
+                        .setNegativeButton("退出应用") { dialog, _ ->
                             // 用户选择退出应用
+                            dialog.cancel()
                             finish()
                         }
                         .setCancelable(false)
@@ -145,7 +146,7 @@ class SplashScreenActivity : AppCompatActivity() {
     }
 
     private fun authorizeAccessSdcard(){
-        if(Environment.isExternalStorageManager()){
+        if( (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) && Environment.isExternalStorageManager()){
            return
         }
         try{

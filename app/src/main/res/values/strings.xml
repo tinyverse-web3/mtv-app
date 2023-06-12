@@ -19,5 +19,7 @@
 
     <string name="enable_autofocus">Autofocus On</string>
     <string name="disable_autofocus">Autofocus Off</string>
+    <string name="takePic">拍照</string>
+    <string name="selectPic">选择图片</string>
 
 </resources>
