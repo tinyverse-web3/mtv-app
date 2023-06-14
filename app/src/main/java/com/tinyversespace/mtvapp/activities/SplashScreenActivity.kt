@@ -1,28 +1,34 @@
 package com.tinyversespace.mtvapp.activities
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.app.AlertDialog
+import android.content.ActivityNotFoundException
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.tinyversespace.mtvapp.R
 import com.tinyversespace.mtvapp.service.MtvService
-import android.Manifest
-import android.app.Activity
-import android.app.AlertDialog
-import android.content.ActivityNotFoundException
-import android.net.Uri
-import android.provider.Settings
-import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import java.io.File
+import java.util.concurrent.CountDownLatch
+import kotlin.system.exitProcess
+
 
 @SuppressLint("CustomSplashScreen")
 class SplashScreenActivity : AppCompatActivity() {
@@ -33,6 +39,24 @@ class SplashScreenActivity : AppCompatActivity() {
         var mtvRootPath = ""
         val permissions = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
         lateinit var requestPermissionLauncher : ActivityResultLauncher<Intent>
+        private lateinit var latch: CountDownLatch
+        private val service: MtvService = MtvService()
+    }
+
+    private val serverCompletedReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            // 接收到任务完成的广播，启动 MainActivity
+            val serverIsOk = intent.getBooleanExtra("server_is_ok", false)
+            if(serverIsOk){
+                val mainIntent = Intent(this@SplashScreenActivity, MainActivity::class.java)
+                startActivity(mainIntent)
+                // 关闭当前活动
+                finish()
+            }else{
+                //提示用户进行操作，重启应用还是退出应用
+                promptUserForAction()
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,6 +69,18 @@ class SplashScreenActivity : AppCompatActivity() {
         if (isStoragePermissionGranted()) {
             launchMtvServer()
         }
+
+        // 注册广播接收器
+        val filter = IntentFilter("$packageName.MTV_SERVER_LAUNCH")
+        registerReceiver(serverCompletedReceiver, filter)
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        // 在活动销毁时注销广播接收器
+        unregisterReceiver(serverCompletedReceiver)
     }
 
     private fun launchMtvServer(){
@@ -55,16 +91,9 @@ class SplashScreenActivity : AppCompatActivity() {
             putExtra("mtv_root_path", mtvRootPath)
         }
         startService(serviceIntent)
-        // 创建 Handler 对象
-        val handler = Handler(Looper.getMainLooper())
-//        // 延迟 3 秒后跳转到主页面
-        handler.postDelayed({
-            val intent = Intent(this@SplashScreenActivity, MainActivity::class.java)
-            startActivity(intent)
-            finish()
-        }, 10000)
-    }
+        //通过serverCompletedReceiver广播器来接收服务是否启动OK
 
+    }
 
     private fun createFolderIfNotExists() : File{
         val folderPath = "${Environment.getExternalStoragePublicDirectory("Android")}/$FOLDER_NAME"
@@ -180,4 +209,27 @@ class SplashScreenActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun promptUserForAction(){
+        AlertDialog.Builder(this)
+            .setTitle("提示")
+            .setMessage("服务启动失败，是否重启应用？")
+            .setPositiveButton("重启") { dialog, _ ->
+                // 关闭对话框
+                dialog.dismiss()
+                // 重启应用
+                val intent = Intent(this, SplashScreenActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                startActivity(intent)
+            }
+            .setNegativeButton("退出") { dialog, _ ->
+                // 关闭对话框
+                dialog.dismiss()
+                // 退出应用
+                exitProcess(0)
+            }
+            .setCancelable(false)
+            .show()
+    }
+
 }

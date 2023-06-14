@@ -1,10 +1,12 @@
 package com.tinyversespace.mtvapp.service
 
+import android.app.AlertDialog
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
+import android.widget.Toast
 import core.Core
-import java.lang.Exception
+import kotlin.system.exitProcess
 
 
 class MtvService : Service() {
@@ -19,6 +21,16 @@ class MtvService : Service() {
         val mtvRootPath = intent?.getStringExtra("mtv_root_path")
         try{
             Core.startDauthService("9888", "sdk", mtvRootPath)
+            val checkIsOK =  Core.checkServerIsOK(30)
+            if(checkIsOK){
+                Toast.makeText(this, "Dauth server launch successfully", Toast.LENGTH_SHORT).show()
+            }else{
+                Toast.makeText(this, "Dauth server launch failed!!!", Toast.LENGTH_LONG).show()
+            }
+            // 发送广播通知任务完成
+            val intent = Intent("$packageName.MTV_SERVER_LAUNCH")
+            intent.putExtra("server_is_ok", checkIsOK)
+            sendBroadcast(intent)
         } catch (e: Exception){
             e.printStackTrace()
         }

@@ -231,7 +231,6 @@ class MainActivityBackup : AppCompatActivity() {
 
     companion object {
         private const val PERMISSIONS_REQUEST_CAMERA = 100
-        private const val FILE_CHOOSER_REQUEST_CODE = "file_chooser"
     }
 
 
