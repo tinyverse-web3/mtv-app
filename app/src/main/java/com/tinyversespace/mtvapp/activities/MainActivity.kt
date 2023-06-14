@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentValues.TAG
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.net.http.SslError
 import android.os.Build
@@ -19,6 +20,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
+import android.webkit.PermissionRequest
 import android.webkit.SslErrorHandler
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -31,6 +33,8 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.core.web.JsBridgeWebView
 import com.core.web.base.BaseWebViewClient
@@ -50,10 +54,14 @@ class MainActivity : AppCompatActivity() {
     var bar: ProgressBar? = null
     val mimeType = "text/html"
     val encoding = "utf-8"
-    private  var fileChooser: ValueCallback<Array<Uri>>? = null
+    private var fileChooser: ValueCallback<Array<Uri>>? = null
     private lateinit var popupWindow: PopupWindow
     private lateinit var photoFile: File
     private lateinit var photoUri: Uri
+
+    companion object {
+        const val CAMERA_PERMISSION_REQUEST_CODE: Int = 10001
+    }
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -116,6 +124,9 @@ class MainActivity : AppCompatActivity() {
         //设置允许文件上传
         allUploadUploadFile(webView!!)
 
+//        //授权使用相机
+//        requestCameraPermission()
+
 
         //在此处添加提供给JS调用的接口，可以添加多个接口类每增加一个接口类：webView.addJavascriptInterface(new ToJSAPIClass(this))；
         //可以添加多行；
@@ -123,6 +134,7 @@ class MainActivity : AppCompatActivity() {
         webView!!.addJavascriptInterface(jsCallMtv, "mtv-client")
         //val url = "https://service.tinyverse.space/test.html"
         var url = "http://192.168.3.181:5173"
+        //var url = "https://webcam-test.com/"
         loadUrl(url)
 
         //String
@@ -195,15 +207,24 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
 
+//            override fun onPermissionRequest(request: PermissionRequest) {
+//                val resources = ArrayList<String>()
+//                if (request.resources.contains(PermissionRequest.RESOURCE_VIDEO_CAPTURE)) {
+//                    resources.add(Manifest.permission.CAMERA)
+//                }
+//                if (request.resources.contains(PermissionRequest.RESOURCE_AUDIO_CAPTURE)) {
+//                    resources.add(Manifest.permission.RECORD_AUDIO)
+//                }
+//                if (resources.isNotEmpty()) {
+//                    request.grant(resources.toTypedArray())
+//                }
+//            }
         }
 
         //出现net::ERR_CACHE_MISS错误提示
         //使用缓存的方式是基于导航类型。正常页面加载的情况下将缓存内容。当导航返回,
         //内容不会恢复（重新加载生成）,而只是从缓存中取回内容
-        if (Build.VERSION.SDK_INT >= 19)
-        {
-            webView!!.settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
-        }
+        webView!!.settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
         webView!!.loadUrl(url!!)
     }
 
@@ -289,6 +310,20 @@ class MainActivity : AppCompatActivity() {
         val imageFileName = "IMG_$timeStamp"
         val storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File.createTempFile(imageFileName, ".jpg", storageDir)
+    }
+
+    private fun requestCameraPermission(){
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            // 相机权限未授予，需要进行请求
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+                // 如果之前用户拒绝过权限请求，可以在这里给出一些解释说明
+                // 可以显示一个对话框或者弹出一个提示，说明需要相机权限的原因
+            }
+            // 请求相机权限
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), CAMERA_PERMISSION_REQUEST_CODE)
+        } else {
+            // 相机权限已经授予，可以进行相机操作
+        }
     }
 
 

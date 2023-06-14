@@ -19,21 +19,18 @@ class MtvService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         // 在此处执行后台任务逻辑，例如网络请求、数据处理等
         val mtvRootPath = intent?.getStringExtra("mtv_root_path")
-        try{
-            Core.startDauthService("9888", "sdk", mtvRootPath)
-            val checkIsOK =  Core.checkServerIsOK(30)
-            if(checkIsOK){
-                Toast.makeText(this, "Dauth server launch successfully", Toast.LENGTH_SHORT).show()
-            }else{
-                Toast.makeText(this, "Dauth server launch failed!!!", Toast.LENGTH_LONG).show()
+        Thread{
+            try{
+                Core.startDauthService("9888", "sdk", mtvRootPath)
+                val checkIsOK =  Core.checkServerIsOK(30)
+                // 发送广播通知任务完成
+                val intent = Intent("$packageName.MTV_SERVER_LAUNCH")
+                intent.putExtra("server_is_ok", checkIsOK)
+                sendBroadcast(intent)
+            } catch (e: Exception){
+                e.printStackTrace()
             }
-            // 发送广播通知任务完成
-            val intent = Intent("$packageName.MTV_SERVER_LAUNCH")
-            intent.putExtra("server_is_ok", checkIsOK)
-            sendBroadcast(intent)
-        } catch (e: Exception){
-            e.printStackTrace()
-        }
+        }.start()
         // START_STICKY 表示服务被杀死后会自动重启
         return START_STICKY
     }

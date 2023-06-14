@@ -49,11 +49,13 @@ class SplashScreenActivity : AppCompatActivity() {
             val serverIsOk = intent.getBooleanExtra("server_is_ok", false)
             if(serverIsOk){
                 val mainIntent = Intent(this@SplashScreenActivity, MainActivity::class.java)
+                Toast.makeText(context, "Dauth server launch successfully", Toast.LENGTH_SHORT).show()
                 startActivity(mainIntent)
                 // 关闭当前活动
                 finish()
             }else{
                 //提示用户进行操作，重启应用还是退出应用
+                Toast.makeText(context, "Dauth server launch failed!!!", Toast.LENGTH_LONG).show()
                 promptUserForAction()
             }
         }
@@ -73,7 +75,6 @@ class SplashScreenActivity : AppCompatActivity() {
         // 注册广播接收器
         val filter = IntentFilter("$packageName.MTV_SERVER_LAUNCH")
         registerReceiver(serverCompletedReceiver, filter)
-
     }
 
     override fun onDestroy() {
