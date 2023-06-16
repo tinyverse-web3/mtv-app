@@ -15,7 +15,19 @@ class QrcodeScanView @JvmOverloads constructor(
     def: Int = 0
     ) : NBZxingView(context, attributeSet, def) {
 
+        private lateinit var onCallBackStringMac: OnCallBackStringMac
+
+        interface OnCallBackStringMac {
+            fun stringMac(text: String)
+        }
+
+        fun setOnCallBackStringMac(onCallBackStringMac: OnCallBackStringMac) {
+            this.onCallBackStringMac = onCallBackStringMac
+        }
+
+
         override fun resultBack(content: Result) {
+            onCallBackStringMac.stringMac(content.text.trim())
             Toast.makeText(context, content.text, Toast.LENGTH_LONG).show()
         }
 

@@ -11,21 +11,24 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.core.web.CallbackBean
 import com.google.android.cameraview.AspectRatio
 import com.tinyversespace.mtvapp.R
+import com.tinyversespace.mtvapp.jsbridge.JsCallMtv
 import com.tinyversespace.mtvapp.views.QrcodeScanView
-
 import com.zhihu.matisse.Matisse
 import com.zhihu.matisse.MimeType
 import com.zhihu.matisse.engine.impl.GlideEngine
 
 
 class QrcodeScanActivity : AppCompatActivity(){
-
-
+    private var qrcodeScanView: QrcodeScanView? = null
+    private var activityRequestCode: String? = ""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        activityRequestCode = intent.getStringExtra("request_code")
         setContentView(R.layout.activity_qrcode_scan)
+        qrcodeScanView = findViewById<QrcodeScanView>(R.id.qrcode_scan_view)
         findViewById<QrcodeScanView>(R.id.qrcode_scan_view).synchLifeStart(this)
         initView()
     }
@@ -63,6 +66,19 @@ class QrcodeScanActivity : AppCompatActivity(){
                     .showPreview(false) // Default is `true`
                     .forResult(1)
             }
+        qrcodeScanView?.setOnCallBackStringMac(object : QrcodeScanView.OnCallBackStringMac {
+            override fun stringMac(text: String) {
+                val callback = JsCallMtv.requestCodeMap[activityRequestCode]
+                if(callback != null){
+                    val message = "成功"
+                    val data: Any = text
+                    val isDelete = false
+                    callback.success(CallbackBean(0, message, data), isDelete)
+                    finish()
+                }
+            }
+        })
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

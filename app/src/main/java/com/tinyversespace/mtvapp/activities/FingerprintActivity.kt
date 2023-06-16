@@ -207,22 +207,22 @@ class FingerprintActivity : AppCompatActivity(), CameraXFragment.OnPhotoTakenLis
     }
 
 
-    //TODO 增加调用JS的回调函数返回结果给前端
-    private fun handleResultAndReturn() {
-        // 处理操作逻辑
-        val result = "完成指纹收集"
-
-        // 处理结果并返回到普通类
-        val jsBridge = JsCallMtv(this)
-        jsBridge.handleActivityResult(result)
-
-        // 关闭当前Activity
-        finish()
-    }
+//    //TODO 增加调用JS的回调函数返回结果给前端
+//    private fun handleResultAndReturn() {
+//        // 处理操作逻辑
+//        val result = "完成指纹收集"
+//
+//        // 处理结果并返回到普通类
+//        val jsBridge = JsCallMtv(this)
+//        jsBridge.handleActivityResult(result)
+//
+//        // 关闭当前Activity
+//        finish()
+//    }
 
     // 在返回键按下时处理返回结果并关闭当前 Activity
     override fun onBackPressed() {
-        handleResultAndReturn()
+//        handleResultAndReturn()
         super.onBackPressed()
     }
 
@@ -232,7 +232,7 @@ class FingerprintActivity : AppCompatActivity(), CameraXFragment.OnPhotoTakenLis
         alertDialogBuilder.setTitle("Confirmation")
         alertDialogBuilder.setMessage("The fingerprint photo has been collected, do you want to proceed?")
         alertDialogBuilder.setPositiveButton("Yes") { dialog, which ->
-            handleResultAndReturn()
+            //handleResultAndReturn()
         }
         alertDialogBuilder.setNegativeButton("No") { dialog, which ->
             // Do nothing, stay on the current activity

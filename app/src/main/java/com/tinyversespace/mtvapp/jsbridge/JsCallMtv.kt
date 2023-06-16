@@ -7,12 +7,12 @@ import android.os.Handler
 import android.webkit.JavascriptInterface
 import android.widget.Toast
 import com.core.web.Callback
+import com.core.web.CallbackBean
 import com.tinyversespace.mtvapp.activities.FingerprintActivity
 import com.tinyversespace.mtvapp.activities.QrcodeScanActivity
 
 class JsCallMtv(private val context: Context) {
 
-    private var activityResultCallback: ActivityResultCallback? = null
 
     @JavascriptInterface
     fun nativeNoArgAndNoCallback() {
@@ -28,13 +28,10 @@ class JsCallMtv(private val context: Context) {
 //                callback.success()
 //            }
 //        })
-        startQrcodeScanActivity(object : ActivityResultCallback {
-            override fun onResult(result: String) {
-                // 处理返回结果
-                Toast.makeText(context, result, Toast.LENGTH_SHORT).show()
-                callback.success()
-            }
-        })
+       startQrcodeScanActivity(callback)
+        // 处理返回结果
+        Toast.makeText(context, "调用原生无参数有回调方法", Toast.LENGTH_SHORT).show()
+        callback.success()
     }
 
     @JavascriptInterface
@@ -67,38 +64,32 @@ class JsCallMtv(private val context: Context) {
         return "原生同步回调"
     }
 
-    private fun startFingerActivity(callback: ActivityResultCallback){
-        this.activityResultCallback = callback
+    private fun startFingerActivity(callback: Callback){
+        requestCodeMap[REQUEST_CODE_QRCODE_SCAN] = callback
         val intent = Intent(context, FingerprintActivity::class.java)
         if (context is Activity) {
+            intent.putExtra("request_code", REQUEST_CODE_QRCODE_SCAN)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            context.startActivityForResult(intent, REQUEST_CODE_FINGER_ACTIVITY)
+            context.startActivity(intent)
         }
     }
 
-
-    // 在回调方法中处理返回结果
-    fun handleActivityResult(result: String) {
-        activityResultCallback?.onResult(result)
-    }
-
-
-    private fun startIpfsActivity(callback: ActivityResultCallback){
-        this.activityResultCallback = callback
-        val intent = Intent(context, FingerprintActivity::class.java)
+    @JavascriptInterface
+    fun startQrcodeScanActivity(callback: Callback){
+        //QrcodeScanActivity.startSelf(context)
+        requestCodeMap[REQUEST_CODE_QRCODE_SCAN] = callback
+        val intent = Intent(context, QrcodeScanActivity::class.java)
         if (context is Activity) {
+            intent.putExtra("request_code", REQUEST_CODE_QRCODE_SCAN)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            context.startActivityForResult(intent, REQUEST_CODE_SECOND_ACTIVITY)
+            context.startActivity(intent)
         }
     }
 
-    private fun startQrcodeScanActivity(callback: ActivityResultCallback){
-        QrcodeScanActivity.startSelf(context)
-    }
 
     companion object {
-        const val REQUEST_CODE_FINGER_ACTIVITY: Int = 1000
-        const val REQUEST_CODE_SECOND_ACTIVITY: Int = 1001
-        const val REQUEST_CODE_QRCODE_SCAN_ACTIVITY: Int = 1002
+        const val REQUEST_CODE_FINGER_ACTIVITY: String = "1000"
+        const val REQUEST_CODE_QRCODE_SCAN: String = "1002"
+        val requestCodeMap = HashMap<String, Callback>()
     }
 }
