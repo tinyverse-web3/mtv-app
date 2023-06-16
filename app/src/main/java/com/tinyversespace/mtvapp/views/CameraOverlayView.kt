@@ -7,7 +7,6 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
-import example.jllarraz.com.minutiae.ui.views.CameraOverlayView
 
 class CameraOverlayView : View {
     private val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG)

@@ -109,5 +109,11 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.15.1'
     //CameraX ----
 
+    //Scan QrCode
+    implementation 'com.github.ailiwean:NBZxing:0.2.5'
+    implementation 'com.github.ailiwean:NBZxing-Scale:0.0.6'
+    implementation 'com.zhihu.android:matisse:0.5.3-beta3'
+
+
 
 }

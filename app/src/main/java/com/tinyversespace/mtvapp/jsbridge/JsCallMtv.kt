@@ -8,6 +8,7 @@ import android.webkit.JavascriptInterface
 import android.widget.Toast
 import com.core.web.Callback
 import com.tinyversespace.mtvapp.activities.FingerprintActivity
+import com.tinyversespace.mtvapp.activities.QrcodeScanActivity
 
 class JsCallMtv(private val context: Context) {
 
@@ -20,7 +21,14 @@ class JsCallMtv(private val context: Context) {
 
     @JavascriptInterface
     fun nativeNoArgAndCallback(callback: Callback) {
-        startFingerActivity(object : ActivityResultCallback {
+//        startFingerActivity(object : ActivityResultCallback {
+//            override fun onResult(result: String) {
+//                // 处理返回结果
+//                Toast.makeText(context, result, Toast.LENGTH_SHORT).show()
+//                callback.success()
+//            }
+//        })
+        startQrcodeScanActivity(object : ActivityResultCallback {
             override fun onResult(result: String) {
                 // 处理返回结果
                 Toast.makeText(context, result, Toast.LENGTH_SHORT).show()
@@ -64,7 +72,7 @@ class JsCallMtv(private val context: Context) {
         val intent = Intent(context, FingerprintActivity::class.java)
         if (context is Activity) {
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            context.startActivityForResult(intent, REQUEST_CODE_SECOND_ACTIVITY)
+            context.startActivityForResult(intent, REQUEST_CODE_FINGER_ACTIVITY)
         }
     }
 
@@ -84,7 +92,13 @@ class JsCallMtv(private val context: Context) {
         }
     }
 
+    private fun startQrcodeScanActivity(callback: ActivityResultCallback){
+        QrcodeScanActivity.startSelf(context)
+    }
+
     companion object {
+        const val REQUEST_CODE_FINGER_ACTIVITY: Int = 1000
         const val REQUEST_CODE_SECOND_ACTIVITY: Int = 1001
+        const val REQUEST_CODE_QRCODE_SCAN_ACTIVITY: Int = 1002
     }
 }

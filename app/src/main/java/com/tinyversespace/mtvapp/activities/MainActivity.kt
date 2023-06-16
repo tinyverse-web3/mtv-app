@@ -20,7 +20,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
-import android.webkit.PermissionRequest
 import android.webkit.SslErrorHandler
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -46,6 +45,7 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.system.exitProcess
 
 
 class MainActivity : AppCompatActivity() {
@@ -124,21 +124,16 @@ class MainActivity : AppCompatActivity() {
         //设置允许文件上传
         allUploadUploadFile(webView!!)
 
-//        //授权使用相机
-//        requestCameraPermission()
-
 
         //在此处添加提供给JS调用的接口，可以添加多个接口类每增加一个接口类：webView.addJavascriptInterface(new ToJSAPIClass(this))；
         //可以添加多行；
         val jsCallMtv = JsCallMtv(this)
         webView!!.addJavascriptInterface(jsCallMtv, "mtv-client")
-        //val url = "https://service.tinyverse.space/test.html"
-        var url = "http://192.168.3.181:5173"
+        val url = "https://service.tinyverse.space/test.html"
+        //var url = "http://192.168.3.181:5173"
         //var url = "https://webcam-test.com/"
+        //val url = "https://dragonir.github.io/h5-scan-qrcode/#/"
         loadUrl(url)
-
-        //String
-        Toast.makeText(this, "调用原生无参数无回调方法", Toast.LENGTH_SHORT).show()
     }
 
     //重写onKeyDown(keyCode, event)方法 改写物理按键 返回的逻辑
@@ -149,7 +144,7 @@ class MainActivity : AppCompatActivity() {
                 webView!!.goBack() //返回上一页面
                 return true
             } else {
-                System.exit(0) //退出程序
+                exitProcess(0) //退出程序
             }
         }
         return super.onKeyDown(keyCode, event)
@@ -207,18 +202,6 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
 
-//            override fun onPermissionRequest(request: PermissionRequest) {
-//                val resources = ArrayList<String>()
-//                if (request.resources.contains(PermissionRequest.RESOURCE_VIDEO_CAPTURE)) {
-//                    resources.add(Manifest.permission.CAMERA)
-//                }
-//                if (request.resources.contains(PermissionRequest.RESOURCE_AUDIO_CAPTURE)) {
-//                    resources.add(Manifest.permission.RECORD_AUDIO)
-//                }
-//                if (resources.isNotEmpty()) {
-//                    request.grant(resources.toTypedArray())
-//                }
-//            }
         }
 
         //出现net::ERR_CACHE_MISS错误提示
@@ -243,6 +226,7 @@ class MainActivity : AppCompatActivity() {
         appWebView.settings.allowFileAccessFromFileURLs = true
         appWebView.settings.allowUniversalAccessFromFileURLs = true
         appWebView.settings.domStorageEnabled = true
+        appWebView.settings.mediaPlaybackRequiresUserGesture = false
     }
 
 

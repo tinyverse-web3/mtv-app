@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
+import android.app.Application.getProcessName
 import android.content.ActivityNotFoundException
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -14,9 +15,10 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.os.Handler
-import android.os.Looper
+import android.os.Process
 import android.provider.Settings
+import android.text.TextUtils
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -36,11 +38,11 @@ class SplashScreenActivity : AppCompatActivity() {
     companion object {
         private const val FOLDER_NAME = ".mtv_repo"
         private const val REQUEST_PERMISSION = 1
+        private const val REQUEST_MANAGE_ALL_FILES_ACCESS_PERMISSION_CODE = 1001
         var mtvRootPath = ""
         val permissions = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
         lateinit var requestPermissionLauncher : ActivityResultLauncher<Intent>
         private lateinit var latch: CountDownLatch
-        private val service: MtvService = MtvService()
     }
 
     private val serverCompletedReceiver = object : BroadcastReceiver() {
@@ -63,19 +65,20 @@ class SplashScreenActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         // 设置布局
         setContentView(R.layout.splash_screen)
-
-        // 检查并请求存储权限
-        if (isStoragePermissionGranted()) {
-            launchMtvServer()
+        if(savedInstanceState == null){
+            // 检查并请求存储权限
+            if (isStoragePermissionGranted()) {
+                launchMtvServer()
+            }
         }
-
         // 注册广播接收器
         val filter = IntentFilter("$packageName.MTV_SERVER_LAUNCH")
         registerReceiver(serverCompletedReceiver, filter)
     }
+
+
 
     override fun onDestroy() {
         super.onDestroy()
@@ -145,27 +148,30 @@ class SplashScreenActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             // Android 11 及以上版本，跳转到系统设置页面
             requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == Activity.RESULT_OK || Environment.isExternalStorageManager()) {
-                    // 用户已经授权 MANAGE_EXTERNAL_STORAGE 权限，可以执行后续的代码
-                    // 在这里执行您的代码逻辑
-                    launchMtvServer()
-                } else {
-                    // 用户未授权 MANAGE_EXTERNAL_STORAGE 权限，弹出提示对话框
-                   AlertDialog.Builder(this@SplashScreenActivity)
-                        .setTitle("权限请求")
-                        .setMessage("需要 MANAGE_EXTERNAL_STORAGE 权限才能正常使用应用，请前往设置授权。")
-                        .setPositiveButton("去授权") { dialog, _ ->
-                            // 跳转到应用设置页面
-                            dialog.cancel()
-                            authorizeAccessSdcard()
-                        }
-                        .setNegativeButton("退出应用") { dialog, _ ->
-                            // 用户选择退出应用
-                            dialog.cancel()
-                            finish()
-                        }
-                        .setCancelable(false)
-                        .show()
+                val receivedData = intent.getIntExtra("request_code", 0)
+                if(receivedData == REQUEST_MANAGE_ALL_FILES_ACCESS_PERMISSION_CODE){
+                    if ( result.resultCode == Activity.RESULT_OK || Environment.isExternalStorageManager()) {
+                        // 用户已经授权 MANAGE_EXTERNAL_STORAGE 权限，可以执行后续的代码
+                        // 在这里执行您的代码逻辑
+                        launchMtvServer()
+                    } else {
+                        // 用户未授权 MANAGE_EXTERNAL_STORAGE 权限，弹出提示对话框
+                        AlertDialog.Builder(this@SplashScreenActivity)
+                            .setTitle("权限请求")
+                            .setMessage("需要 MANAGE_EXTERNAL_STORAGE 权限才能正常使用应用，请前往设置授权。")
+                            .setPositiveButton("去授权") { dialog, _ ->
+                                // 跳转到应用设置页面
+                                dialog.cancel()
+                                authorizeAccessSdcard()
+                            }
+                            .setNegativeButton("退出应用") { dialog, _ ->
+                                // 用户选择退出应用
+                                dialog.cancel()
+                                finish()
+                            }
+                            .setCancelable(false)
+                            .show()
+                    }
                 }
             }
             authorizeAccessSdcard()
@@ -179,17 +185,10 @@ class SplashScreenActivity : AppCompatActivity() {
         if( (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) && Environment.isExternalStorageManager()){
            return
         }
-        try{
-            val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
-            intent.data = Uri.parse("package:$packageName")
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            requestPermissionLauncher.launch(intent)
-        }catch (ex: ActivityNotFoundException){
-            ex.printStackTrace()
-            val appIntent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            requestPermissionLauncher.launch(appIntent)
-        }
+        val appIntent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        intent.putExtra("request_code", REQUEST_MANAGE_ALL_FILES_ACCESS_PERMISSION_CODE)
+        requestPermissionLauncher.launch(appIntent)
     }
 
 

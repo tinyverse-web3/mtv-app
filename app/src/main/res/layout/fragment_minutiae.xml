@@ -27,7 +27,7 @@
         android:layout_height="match_parent"
         tools:ignore="RelativeOverlap"/>
 
-    <example.jllarraz.com.minutiae.ui.views.CameraOverlayView
+    <com.tinyversespace.mtvapp.views.CameraOverlayView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
 
