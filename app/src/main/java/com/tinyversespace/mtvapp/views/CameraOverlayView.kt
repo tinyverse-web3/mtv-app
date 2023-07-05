@@ -1,4 +1,4 @@
-package example.jllarraz.com.minutiae.ui.views
+package com.tinyversespace.mtvapp.views
 
 import android.content.Context
 import android.graphics.Canvas

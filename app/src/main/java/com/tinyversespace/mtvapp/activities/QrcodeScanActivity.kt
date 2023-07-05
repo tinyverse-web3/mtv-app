@@ -74,6 +74,7 @@ class QrcodeScanActivity : AppCompatActivity(){
                     val data: Any = text
                     val isDelete = false
                     callback.success(CallbackBean(0, message, data), isDelete)
+                    setResult(Activity.RESULT_OK, intent)
                     finish()
                 }
             }

@@ -173,7 +173,6 @@ class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "onReceivedSslError!")
                 handler.proceed() // Ignore SSL certificate errors
             }
-
         }
         //添加进度条
         webView!!.webChromeClient = object : WebChromeClient() {
@@ -207,7 +206,8 @@ class MainActivity : AppCompatActivity() {
         //出现net::ERR_CACHE_MISS错误提示
         //使用缓存的方式是基于导航类型。正常页面加载的情况下将缓存内容。当导航返回,
         //内容不会恢复（重新加载生成）,而只是从缓存中取回内容
-        webView!!.settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
+//        webView!!.settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
+        webView!!.settings.cacheMode = WebSettings.LOAD_NO_CACHE
         webView!!.loadUrl(url!!)
     }
 

@@ -27,7 +27,10 @@ class QrcodeScanView @JvmOverloads constructor(
 
 
         override fun resultBack(content: Result) {
-            onCallBackStringMac.stringMac(content.text.trim())
+            if(content.text == null){
+                content.text = content.toString()
+            }
+            onCallBackStringMac.stringMac(content.text)
             Toast.makeText(context, content.text, Toast.LENGTH_LONG).show()
         }
 
@@ -40,7 +43,7 @@ class QrcodeScanView @JvmOverloads constructor(
          * 5 ScanTypeConfig.ONE_DIMENSION 所有一维码格式
          */
         override fun configScanType(): ScanTypeConfig {
-            return ScanTypeConfig.HIGH_FREQUENCY
+            return ScanTypeConfig.ONLY_QR_CODE
         }
 
         fun toParse(string: String) {
@@ -54,7 +57,11 @@ class QrcodeScanView @JvmOverloads constructor(
         override fun resultBackFile(content: com.ailiwean.core.zxing.core.Result?) {
             if (content == null)
                 Toast.makeText(context, "未扫描到内容", Toast.LENGTH_SHORT).show()
-            else Toast.makeText(context, content.text, Toast.LENGTH_SHORT).show()
+            else {
+                onCallBackStringMac.stringMac(content.toString())
+                Toast.makeText(context, content.text, Toast.LENGTH_SHORT).show()
+            }
+
         }
 
         override fun isSupportAutoZoom(): Boolean {

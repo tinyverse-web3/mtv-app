@@ -7,12 +7,11 @@ import android.os.Handler
 import android.webkit.JavascriptInterface
 import android.widget.Toast
 import com.core.web.Callback
-import com.core.web.CallbackBean
 import com.tinyversespace.mtvapp.activities.FingerprintActivity
+import com.tinyversespace.mtvapp.activities.MainActivity
 import com.tinyversespace.mtvapp.activities.QrcodeScanActivity
 
 class JsCallMtv(private val context: Context) {
-
 
     @JavascriptInterface
     fun nativeNoArgAndNoCallback() {
@@ -28,7 +27,7 @@ class JsCallMtv(private val context: Context) {
 //                callback.success()
 //            }
 //        })
-       startQrcodeScanActivity(callback)
+        startQrcodeScanActivity(callback)
         // 处理返回结果
         Toast.makeText(context, "调用原生无参数有回调方法", Toast.LENGTH_SHORT).show()
         callback.success()
@@ -64,7 +63,7 @@ class JsCallMtv(private val context: Context) {
         return "原生同步回调"
     }
 
-    private fun startFingerActivity(callback: Callback){
+    private fun startFingerActivity(callback: Callback) {
         requestCodeMap[REQUEST_CODE_QRCODE_SCAN] = callback
         val intent = Intent(context, FingerprintActivity::class.java)
         if (context is Activity) {
@@ -75,11 +74,12 @@ class JsCallMtv(private val context: Context) {
     }
 
     @JavascriptInterface
-    fun startQrcodeScanActivity(callback: Callback){
+    fun startQrcodeScanActivity(callback: Callback) {
         //QrcodeScanActivity.startSelf(context)
         requestCodeMap[REQUEST_CODE_QRCODE_SCAN] = callback
-        val intent = Intent(context, QrcodeScanActivity::class.java)
+        val mainActivity = context as MainActivity
         if (context is Activity) {
+            val intent = Intent(context, QrcodeScanActivity::class.java)
             intent.putExtra("request_code", REQUEST_CODE_QRCODE_SCAN)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             context.startActivity(intent)
