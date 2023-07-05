@@ -61,13 +61,16 @@ class SplashScreenActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         // 设置布局
         setContentView(R.layout.splash_screen)
-        if(savedInstanceState == null){
+        if(savedInstanceState == null){ //防止onCreate被多次调用
             // 检查并请求存储权限
-            if (isStoragePermissionGranted()) {
-                launchMtvServer()
-            }
+            //if (isStoragePermissionGranted()) { //数据保存在/sdcard/Android目录中，需要调用此方法来进行授权，删除App，用户数据也会被保留
+            //    launchMtvServer()
+            //}
+            //数据只保存在/sdcard/Android/com.tinyversespace.mtvapp/目录中 注意：删除App，用户数据也会被删除
+            launchMtvServer()
         }
         // 注册广播接收器
+        //通过serverCompletedReceiver广播器来接收服务是否启动OK
         val filter = IntentFilter("$packageName.MTV_SERVER_LAUNCH")
         registerReceiver(serverCompletedReceiver, filter)
     }
@@ -89,12 +92,11 @@ class SplashScreenActivity : AppCompatActivity() {
             putExtra("mtv_root_path", mtvRootPath)
         }
         startService(serviceIntent)
-        //通过serverCompletedReceiver广播器来接收服务是否启动OK
-
     }
 
     private fun createFolderIfNotExists() : File{
-        val folderPath = "${Environment.getExternalStoragePublicDirectory("Android")}/$FOLDER_NAME"
+        //val folderPath = "${Environment.getExternalStoragePublicDirectory("Android")}/$FOLDER_NAME" //数据保存在/sdcard/Android目录中， 删除App，用户数据也会被保留
+        val folderPath = "${this.getExternalFilesDir(null)}/$FOLDER_NAME" //数据只保存在/sdcard/Android/com.tinyversespace.mtvapp/，删除App，用户数据也会被删除
         val folder = File(folderPath)
 
         if (!folder.exists()) {
