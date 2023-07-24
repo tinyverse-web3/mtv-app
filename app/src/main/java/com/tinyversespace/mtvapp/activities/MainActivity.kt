@@ -11,6 +11,7 @@ import android.net.http.SslError
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Log
 import android.view.Gravity
@@ -35,6 +36,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.documentfile.provider.DocumentFile
 import com.core.web.JsBridgeWebView
 import com.core.web.base.BaseWebViewClient
 import com.tinyversespace.mtvapp.BuildConfig
@@ -49,6 +51,7 @@ import kotlin.system.exitProcess
 
 
 class MainActivity : AppCompatActivity() {
+    val TAG = "MainActivity"
 
     var webView: JsBridgeWebView? = null
     var bar: ProgressBar? = null
@@ -58,6 +61,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var popupWindow: PopupWindow
     private lateinit var photoFile: File
     private lateinit var photoUri: Uri
+    private var filetype : String = "*.*"
 
     companion object {
         const val CAMERA_PERMISSION_REQUEST_CODE: Int = 10001
@@ -92,7 +96,7 @@ class MainActivity : AppCompatActivity() {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 // 从相册选择成功，处理选择的文件
-                val data = result.data
+                val data: Intent? = result.data
                 val selectedFiles = arrayOf(data?.data!!)
                 fileChooser?.onReceiveValue(selectedFiles)
                 fileChooser = null
@@ -103,10 +107,38 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    private fun getRealPathFromURI(uri: Uri): String? {
+        val projection = arrayOf(MediaStore.Images.Media.DATA)
+        val cursor = contentResolver.query(uri, projection, null, null, null)
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val columnIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+                return it.getString(columnIndex)
+            }
+        }
+        return null
+    }
 
+    private fun requestStoragePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val permission = Manifest.permission.READ_EXTERNAL_STORAGE
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+                    // 显示权限解释给用户
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 请求相机权限
+        requestCameraPermission()
+
+        // 请求存储权限
+        requestStoragePermission()
+
         //将屏幕设置为全屏
         window.setFlags(
             WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -129,8 +161,8 @@ class MainActivity : AppCompatActivity() {
         //可以添加多行；
         val jsCallMtv = JsCallMtv(this)
         webView!!.addJavascriptInterface(jsCallMtv, "mtv-client")
-        val url = "https://service.tinyverse.space/test.html"
-        //var url = "http://192.168.3.181:5173"
+        val url = "https://dev.tinyverse.space/"
+        //var url = "https://192.168.1.104:5173/"
         //var url = "https://webcam-test.com/"
         //val url = "https://dragonir.github.io/h5-scan-qrcode/#/"
         loadUrl(url)
@@ -193,10 +225,23 @@ class MainActivity : AppCompatActivity() {
                 filePathCallback: ValueCallback<Array<Uri>>?,
                 fileChooserParams: FileChooserParams?
             ): Boolean {
+                var SelectFile = 0
+                var filetypes = fileChooserParams?.getAcceptTypes()
+                if (filetypes != null){
+                    if (filetypes[0].length > 0  && filetypes[0] == "image/*") {
+                        SelectFile = 1
+                    }
+                }
                 fileChooser = filePathCallback
 
-                // 请求权限
-                requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+                if (SelectFile == 1) {
+                    // need select a image , first request camera permission
+                    // 请求权限
+                    requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+                } else {
+                    // 请求存储权限
+                    chooseFile()
+                }
 
                 return true
             }
@@ -288,6 +333,15 @@ class MainActivity : AppCompatActivity() {
         galleryIntent.type = "image/*"
         chooseFromGalleryLauncher.launch(galleryIntent)
     }
+
+    private fun chooseFile() {
+        //val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        val galleryIntent = Intent(Intent.ACTION_GET_CONTENT)
+        galleryIntent.type = "*/*"
+        chooseFromGalleryLauncher.launch(galleryIntent)
+    }
+
+
 
     private fun createImageFile(): File {
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
