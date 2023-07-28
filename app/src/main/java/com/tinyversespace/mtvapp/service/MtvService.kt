@@ -21,7 +21,7 @@ class MtvService : Service() {
         val mtvRootPath = intent?.getStringExtra("mtv_root_path")
         Thread{
             try{
-                Core.startDauthService("9888", "sdk", mtvRootPath)
+                Core.startDauthService("9888", "sdk", mtvRootPath, "mtv")
                 val checkIsOK =  Core.checkServerIsOK(30)
                 // 发送广播通知任务完成
                 val intent = Intent("$packageName.MTV_SERVER_LAUNCH")

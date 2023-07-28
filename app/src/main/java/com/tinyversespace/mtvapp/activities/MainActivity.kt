@@ -10,7 +10,6 @@ import android.net.http.SslError
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Log
 import android.view.Gravity
@@ -20,6 +19,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
+import android.webkit.DownloadListener
 import android.webkit.SslErrorHandler
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -35,12 +35,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.documentfile.provider.DocumentFile
 import com.core.web.JsBridgeWebView
 import com.core.web.base.BaseWebViewClient
 import com.tinyversespace.mtvapp.BuildConfig
 import com.tinyversespace.mtvapp.R
 import com.tinyversespace.mtvapp.jsbridge.JsCallMtv
+import com.tinyversespace.mtvapp.utils.GeneralUtils
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -54,7 +54,6 @@ class MainActivity : AppCompatActivity() {
 
     var webView: JsBridgeWebView? = null
     var bar: ProgressBar? = null
-    val mimeType = "text/html"
     val encoding = "utf-8"
     private var fileChooser: ValueCallback<Array<Uri>>? = null
     private lateinit var popupWindow: PopupWindow
@@ -155,6 +154,8 @@ class MainActivity : AppCompatActivity() {
         //设置允许文件上传
         allUploadUploadFile(webView!!)
 
+        //下载文件
+        webView!!.setDownloadListener(imageDownloadListener)
 
         //在此处添加提供给JS调用的接口，可以添加多个接口类每增加一个接口类：webView.addJavascriptInterface(new ToJSAPIClass(this))；
         //可以添加多行；
@@ -244,7 +245,6 @@ class MainActivity : AppCompatActivity() {
 
                 return true
             }
-
         }
 
         //出现net::ERR_CACHE_MISS错误提示
@@ -363,5 +363,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private var imageDownloadListener =
+        DownloadListener { url, _, _, mimetype, _ ->
+            GeneralUtils.saveBase64ImageToGallery(this, null, url, mimetype)
+        }
 
 }
