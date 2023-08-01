@@ -22,4 +22,12 @@
     <string name="takePic">拍照</string>
     <string name="selectPic">选择图片</string>
 
+
+    <!-- for biometric   -->
+    <string name="prompt_info_title">MTV Authentication</string>
+    <string name="prompt_info_subtitle">Please login to get access</string>
+    <string name="prompt_info_description">MTV is using Android biometric authentication</string>
+    <string name="prompt_info_use_app_password">Use app password</string>
+    <string name="secret_key_name">mtv_biometric_encryption_key</string>
+
 </resources>

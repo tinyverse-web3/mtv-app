@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:SweepLoadingView="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+   >
+
+    <LinearLayout
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/loadview_circle_corners"
+        >
+        <com.tinyversespace.mtvapp.views.progress.WebViewCircleProgress
+            android:id="@+id/progress_bar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            SweepLoadingView:showArrow="false"
+            android:contentDescription="加载中"/>
+
+        <TextView
+            android:id="@+id/tvShow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:textColor="#252424"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+
+
+</RelativeLayout>

@@ -11,6 +11,8 @@ import android.widget.Toast
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.Timer
+import java.util.TimerTask
 
 object GeneralUtils {
 
@@ -56,13 +58,29 @@ object GeneralUtils {
         }
     }
 
-    private fun showToast(context: Context, message: String) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+     private fun showToast(context: Context, message: String) {
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
     }
 
     private fun makeFileName(): String {
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         return "IMG_$timeStamp"
+    }
+
+    fun showToast(context: Context, message: String, duration: Int) {
+        val toast = Toast.makeText(context, message, Toast.LENGTH_LONG)
+        val timer = Timer()
+        timer.schedule(object : TimerTask() {
+            override fun run() {
+                toast.show()
+            }
+        }, 0, 3500)
+        Timer().schedule(object : TimerTask() {
+            override fun run() {
+                toast.cancel()
+                timer.cancel()
+            }
+        }, duration.toLong())
     }
 
 }

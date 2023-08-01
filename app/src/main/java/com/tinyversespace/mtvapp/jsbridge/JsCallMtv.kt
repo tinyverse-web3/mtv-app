@@ -7,9 +7,12 @@ import android.os.Handler
 import android.webkit.JavascriptInterface
 import android.widget.Toast
 import com.core.web.Callback
+import com.core.web.JsCallback
+import com.tinyversespace.mtvapp.activities.BiometricLoginActivity
 import com.tinyversespace.mtvapp.activities.FingerprintActivity
 import com.tinyversespace.mtvapp.activities.MainActivity
 import com.tinyversespace.mtvapp.activities.QrcodeScanActivity
+import com.tinyversespace.mtvapp.biometric.AppUser
 
 class JsCallMtv(private val context: Context) {
 
@@ -86,10 +89,35 @@ class JsCallMtv(private val context: Context) {
         }
     }
 
+    @JavascriptInterface
+    fun startBiometric(callback: Callback) {
+        requestCodeMap[REQUEST_CODE_BIOMETRIC_VERIFY] = callback
+        val mainActivity = context as MainActivity
+        if (context is Activity) {
+            // 进行生物识别验证
+            mainActivity.startBiometricVerify(REQUEST_CODE_BIOMETRIC_VERIFY)
+        }
+    }
+
+    @JavascriptInterface
+    fun setupBiometrics(params: String, callback: Callback) {
+        requestCodeMap[REQUEST_CODE_SET_UP_BIOMETRIC] = callback
+        AppUser.fakeToken = params //清空之前的用户token
+        val mainActivity = context as MainActivity
+        if (context is Activity) {
+            // 设置生物识别验证
+            val intent = Intent(context, BiometricLoginActivity::class.java)
+            intent.putExtra("request_code", REQUEST_CODE_SET_UP_BIOMETRIC)
+            context.startActivity(intent)
+        }
+    }
+
 
     companion object {
         const val REQUEST_CODE_FINGER_ACTIVITY: String = "1000"
         const val REQUEST_CODE_QRCODE_SCAN: String = "1002"
+        const val REQUEST_CODE_BIOMETRIC_VERIFY: String = "1003"
+        const val REQUEST_CODE_SET_UP_BIOMETRIC: String = "1004"
         val requestCodeMap = HashMap<String, Callback>()
     }
 }

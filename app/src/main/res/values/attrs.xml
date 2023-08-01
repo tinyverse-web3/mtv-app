@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CircleProgress">
+        <attr name="progressBorderWidth" format="dimension" />
+        <attr name="showArrow" format="boolean" />
+    </declare-styleable>
+</resources>

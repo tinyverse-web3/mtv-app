@@ -36,6 +36,7 @@
         <activity android:name=".activities.FingerprintActivity" />
         <activity android:name=".activities.FullScreenActivity" />
         <activity android:name=".activities.QrcodeScanActivity" />
+        <activity android:name=".activities.BiometricLoginActivity" android:theme="@style/Theme.AppCompat.NoActionBar" />
         <service
             android:name=".service.MtvService"
             android:stopWithTask="true" />

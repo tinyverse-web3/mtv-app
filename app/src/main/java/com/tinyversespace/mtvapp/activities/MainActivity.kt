@@ -3,6 +3,7 @@ package com.tinyversespace.mtvapp.activities
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -28,19 +29,28 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.widget.Button
 import android.widget.PopupWindow
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import com.core.web.CallbackBean
 import com.core.web.JsBridgeWebView
 import com.core.web.base.BaseWebViewClient
 import com.tinyversespace.mtvapp.BuildConfig
 import com.tinyversespace.mtvapp.R
+import com.tinyversespace.mtvapp.biometric.AppUser
+import com.tinyversespace.mtvapp.biometric.BiometricPromptUtils
+import com.tinyversespace.mtvapp.biometric.CIPHERTEXT_WRAPPER
+import com.tinyversespace.mtvapp.biometric.CryptographyManager
+import com.tinyversespace.mtvapp.biometric.SHARED_PREFS_FILENAME
 import com.tinyversespace.mtvapp.jsbridge.JsCallMtv
 import com.tinyversespace.mtvapp.utils.GeneralUtils
+import com.tinyversespace.mtvapp.views.progress.LoadView
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -53,13 +63,26 @@ class MainActivity : AppCompatActivity() {
     val TAG = "MainActivity"
 
     var webView: JsBridgeWebView? = null
-    var bar: ProgressBar? = null
     val encoding = "utf-8"
     private var fileChooser: ValueCallback<Array<Uri>>? = null
     private lateinit var popupWindow: PopupWindow
     private lateinit var photoFile: File
     private lateinit var photoUri: Uri
     private var filetype : String = "*.*"
+    private lateinit var jsCallMtv: JsCallMtv
+
+        //for biometric
+    private var biometricJsRequestCode: String = ""
+    private lateinit var biometricPrompt: BiometricPrompt
+    private val cryptographyManager = CryptographyManager()
+    private val ciphertextWrapper
+        get() = cryptographyManager.getCiphertextWrapperFromSharedPrefs(
+            applicationContext,
+            SHARED_PREFS_FILENAME,
+            Context.MODE_PRIVATE,
+            CIPHERTEXT_WRAPPER
+        )
+
 
     companion object {
         const val CAMERA_PERMISSION_REQUEST_CODE: Int = 10001
@@ -105,6 +128,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+
     private fun getRealPathFromURI(uri: Uri): String? {
         val projection = arrayOf(MediaStore.Images.Media.DATA)
         val cursor = contentResolver.query(uri, projection, null, null, null)
@@ -145,27 +169,45 @@ class MainActivity : AppCompatActivity() {
         //去掉标题栏
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         setContentView(R.layout.activity_main_webview)
-        bar = findViewById<View>(R.id.progressBar1) as ProgressBar
         webView = findViewById<View>(R.id.webView) as JsBridgeWebView
 
-        //设置允许http
-        allowHttp(webView!!)
 
-        //设置允许文件上传
-        allUploadUploadFile(webView!!)
+        //初始化webView及设置webView
+        webViewInit()
+
+        //加载主页面
+        //val url = "https://service.tinyverse.space/test.html"
+        var url = "https://dev.tinyverse.space/"
+        //var url = "http://192.168.1.104:5173"
+        //var url = "https://webcam-test.com/"
+        //val url = "https://dragonir.github.io/h5-scan-qrcode/#/"
+        loadUrl(url)
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    fun webViewInit() {
+        //在此处添加提供给JS调用的接口，可以添加多个接口类每增加一个接口类：webView.addJavascriptInterface(new ToJSAPIClass(this))；
+        //可以添加多行；
+        jsCallMtv = JsCallMtv(this)
+        webView!!.addJavascriptInterface(jsCallMtv, "mtv-client")
+
+        val ws = webView!!.settings
+        ws.javaScriptEnabled = true //开启JavaScript支持
+        ws.domStorageEnabled = true //增加访问web storage支持
+        ws.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW //允许访问http与https混合模式
+        ws.javaScriptCanOpenWindowsAutomatically = true //让JavaScript自动打开窗口，默认false。适用于JavaScript方法window.open()
+        ws.allowFileAccess = true //是否允许访问文件，默认允许
+        ws.allowContentAccess = true //允许在WebView中访问内容URL（Content Url），默认允许。内容Url访问允许WebView从安装在系统中的内容提 供者载入内容。
+
+        //出现net::ERR_CACHE_MISS错误提示
+        //使用缓存的方式是基于导航类型。正常页面加载的情况下将缓存内容。当导航返回,
+        //内容不会恢复（重新加载生成）,而只是从缓存中取回内容
+        //webView!!.settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
+        ws.cacheMode = WebSettings.LOAD_NO_CACHE
 
         //下载文件
         webView!!.setDownloadListener(imageDownloadListener)
 
-        //在此处添加提供给JS调用的接口，可以添加多个接口类每增加一个接口类：webView.addJavascriptInterface(new ToJSAPIClass(this))；
-        //可以添加多行；
-        val jsCallMtv = JsCallMtv(this)
-        webView!!.addJavascriptInterface(jsCallMtv, "mtv-client")
-        val url = "https://dev.tinyverse.space/"
-        //var url = "https://192.168.1.104:5173/"
-        //var url = "https://webcam-test.com/"
-        //val url = "https://dragonir.github.io/h5-scan-qrcode/#/"
-        loadUrl(url)
     }
 
     //重写onKeyDown(keyCode, event)方法 改写物理按键 返回的逻辑
@@ -182,17 +224,32 @@ class MainActivity : AppCompatActivity() {
         return super.onKeyDown(keyCode, event)
     }
 
+    /**
+     * The logic is kept inside onResume instead of onCreate so that authorizing biometrics takes
+     * immediate effect.
+     */
+    override fun onResume() {
+        super.onResume()
+
+        if (ciphertextWrapper != null) {
+            if (AppUser.fakeToken == null) {
+                showBiometricPromptForDecryption(biometricJsRequestCode)
+            } else {
+                // The user has already logged in, so proceed to the rest of the app
+                // this is a todo for you, the developer
+            }
+        }
+    }
+
 
     private fun loadUrl(url: String?) {
-        val ws = webView!!.settings
-        ws.javaScriptEnabled = true //开启JavaScript支持
-        ws.domStorageEnabled = true //增加访问web storage支持
         webView!!.webViewClient = object : BaseWebViewClient() {
             override fun shouldOverrideUrlLoading(
                 view: WebView,
                 request: WebResourceRequest
             ): Boolean {
-                webView!!.loadUrl(request.url.toString())
+                var newUrl = updateUrlTimestamp(request.url.toString())
+                webView!!.loadUrl(newUrl)
                 return true
             }
 
@@ -206,16 +263,19 @@ class MainActivity : AppCompatActivity() {
                 handler.proceed() // Ignore SSL certificate errors
             }
         }
+
         //添加进度条
+        LoadView.initDialog(this)
+
         webView!!.webChromeClient = object : WebChromeClient() {
             override fun onProgressChanged(view: WebView, newProgress: Int) {
                 if (newProgress == 100) {
-                    bar!!.visibility = View.INVISIBLE
+                    LoadView.stopLoading()
                 } else {
-                    if (View.INVISIBLE == bar!!.visibility) {
-                        bar!!.visibility = View.VISIBLE
+                    LoadView.showLoading(view.context, newProgress.toString() + "")
+                    if (newProgress == 100) {
+                        LoadView.stopLoading()
                     }
-                    bar!!.progress = newProgress
                 }
                 super.onProgressChanged(view, newProgress)
             }
@@ -225,16 +285,16 @@ class MainActivity : AppCompatActivity() {
                 filePathCallback: ValueCallback<Array<Uri>>?,
                 fileChooserParams: FileChooserParams?
             ): Boolean {
-                var SelectFile = 0
-                var filetypes = fileChooserParams?.getAcceptTypes()
+                var selectFile = 0
+                var filetypes = fileChooserParams?.acceptTypes
                 if (filetypes != null){
-                    if (filetypes[0].length > 0  && filetypes[0] == "image/*") {
-                        SelectFile = 1
+                    if (filetypes[0].isNotEmpty() && filetypes[0] == "image/*") {
+                        selectFile = 1
                     }
                 }
                 fileChooser = filePathCallback
 
-                if (SelectFile == 1) {
+                if (selectFile == 1) {
                     // need select a image , first request camera permission
                     // 请求权限
                     requestPermissionLauncher.launch(Manifest.permission.CAMERA)
@@ -247,31 +307,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        //出现net::ERR_CACHE_MISS错误提示
-        //使用缓存的方式是基于导航类型。正常页面加载的情况下将缓存内容。当导航返回,
-        //内容不会恢复（重新加载生成）,而只是从缓存中取回内容
-//        webView!!.settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
-        webView!!.settings.cacheMode = WebSettings.LOAD_NO_CACHE
+        // 加载主页面
         webView!!.loadUrl(url!!)
     }
 
 
-    private fun allowHttp(appWebView: JsBridgeWebView){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            appWebView.settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-        }
-        appWebView.settings.allowFileAccessFromFileURLs = true
-        appWebView.settings.allowUniversalAccessFromFileURLs = true
-    }
-
-    private fun allUploadUploadFile(appWebView: JsBridgeWebView){
-        appWebView.settings.allowFileAccess = true
-        appWebView.settings.allowContentAccess = true
-        appWebView.settings.allowFileAccessFromFileURLs = true
-        appWebView.settings.allowUniversalAccessFromFileURLs = true
-        appWebView.settings.domStorageEnabled = true
-        appWebView.settings.mediaPlaybackRequiresUserGesture = false
-    }
 
 
     override fun onBackPressed() {
@@ -343,7 +383,7 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun createImageFile(): File {
-        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.getDefault()).format(Date())
         val imageFileName = "IMG_$timeStamp"
         val storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File.createTempFile(imageFileName, ".jpg", storageDir)
@@ -368,4 +408,84 @@ class MainActivity : AppCompatActivity() {
             GeneralUtils.saveBase64ImageToGallery(this, null, url, mimetype)
         }
 
+    fun startBiometricVerify(jsRequestCode: String) {
+        this.biometricJsRequestCode = jsRequestCode
+        if (ciphertextWrapper != null) {
+            showBiometricPromptForDecryption(jsRequestCode)
+        } else {
+            showEnableBiometricDialog()
+        }
+    }
+
+    // for biometric
+    private fun showBiometricPromptForDecryption(jsRequestCode: String) {
+        ciphertextWrapper?.let { textWrapper ->
+            val canAuthenticate = BiometricManager.from(applicationContext).canAuthenticate()
+            if (canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS) {
+                val secretKeyName = getString(R.string.secret_key_name)
+                val cipher = cryptographyManager.getInitializedCipherForDecryption(
+                    secretKeyName, textWrapper.initializationVector
+                )
+                biometricPrompt =
+                    BiometricPromptUtils.createBiometricPrompt(
+                        jsRequestCode,
+                        this,
+                        ::decryptServerTokenFromStorage
+                    )
+                val promptInfo = BiometricPromptUtils.createPromptInfo(this)
+                biometricPrompt.authenticate(promptInfo, BiometricPrompt.CryptoObject(cipher))
+            }else{
+                GeneralUtils.showToast(this, "用户无法进行身份验证，因为没有注册生物识别或设备凭据。", 15 * 1000)//15秒
+            }
+        }
+    }
+
+    // for biometric
+    private fun decryptServerTokenFromStorage(authResult: BiometricPrompt.AuthenticationResult, requestCode: String) {
+        ciphertextWrapper?.let { textWrapper ->
+            authResult.cryptoObject?.cipher?.let {
+                val plaintext =
+                    cryptographyManager.decryptData(textWrapper.ciphertext, it)
+                AppUser.fakeToken = plaintext
+                // Now that you have the token, you can query server for everything else
+                // the only reason we call this fakeToken is because we didn't really get it from
+                // the server. In your case, you will have gotten it from the server the first time
+                // and therefore, it's a real token.
+                val callback = JsCallMtv.requestCodeMap[requestCode]
+                if(callback != null){
+                    val message = "生物识别认证成功"
+                    val data: Any = plaintext
+                    val isDelete = false
+                    callback.success(CallbackBean(0, message, data), isDelete)
+                }
+            }
+        }
+    }
+
+    //for biometric
+    private fun showEnableBiometricDialog() {
+        val alertDialog = AlertDialog.Builder(this)
+            .setTitle("应用生物识别未配置")
+            .setMessage("请解锁后在设置页面进行设置")
+            .setPositiveButton("确定") { _, _ ->
+            }
+            .create()
+
+        alertDialog.show()
+    }
+
+    //解决当页面刷新jsbridge失效的问题，通过解决刷新后添加一个时间戳
+    private fun updateUrlTimestamp(originalUrl: String): String {
+        // 创建一个格式化日期的对象
+        val dateFormat = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault())
+        // 获取当前时间并格式化为时间戳
+        val timestamp = dateFormat.format(Date())
+        // 使用 Uri.Builder 构建 URL，并在参数中添加时间戳
+        val uri = Uri.parse(originalUrl)
+            .buildUpon()
+            .appendQueryParameter("timestamp", timestamp)
+            .build()
+        // 获取带有时间戳的最终 URL
+        return uri.toString()
+    }
 }

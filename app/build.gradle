@@ -114,6 +114,8 @@ dependencies {
     implementation 'com.github.ailiwean:NBZxing-Scale:0.0.6'
     implementation 'com.zhihu.android:matisse:0.5.3-beta3'
 
-
+    //Biometric
+    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'androidx.biometric:biometric-ktx:1.2.0-alpha05'
 
 }
