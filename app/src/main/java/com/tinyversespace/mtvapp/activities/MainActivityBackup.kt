@@ -63,7 +63,6 @@ class MainActivityBackup : AppCompatActivity() {
         //去掉标题栏
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         setContentView(R.layout.activity_main_webview)
-        bar = findViewById<View>(R.id.progressBar1) as ProgressBar
         webView = findViewById<View>(R.id.webView) as JsBridgeWebView
 
         //设置允许http

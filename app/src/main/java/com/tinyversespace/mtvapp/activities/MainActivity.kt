@@ -420,7 +420,8 @@ class MainActivity : AppCompatActivity() {
     // for biometric
     private fun showBiometricPromptForDecryption(jsRequestCode: String) {
         ciphertextWrapper?.let { textWrapper ->
-            val canAuthenticate = BiometricManager.from(applicationContext).canAuthenticate()
+            val canAuthenticate = BiometricManager.from(applicationContext).canAuthenticate(
+                BiometricManager.Authenticators.BIOMETRIC_WEAK)
             if (canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS) {
                 val secretKeyName = getString(R.string.secret_key_name)
                 val cipher = cryptographyManager.getInitializedCipherForDecryption(

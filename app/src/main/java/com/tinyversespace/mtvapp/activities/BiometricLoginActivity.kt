@@ -29,7 +29,8 @@ class BiometricLoginActivity : AppCompatActivity() {
     }
 
     private fun showBiometricPromptForEncryption() {
-        val canAuthenticate = BiometricManager.from(applicationContext).canAuthenticate()
+        val canAuthenticate = BiometricManager.from(applicationContext).canAuthenticate(
+            BiometricManager.Authenticators.BIOMETRIC_WEAK)
         if (canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS) {
             val secretKeyName = getString(R.string.secret_key_name)
             cryptographyManager = CryptographyManager()
