@@ -1,6 +1,8 @@
 package com.tinyversespace.mtvapp.activities
 
 import android.Manifest
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
@@ -13,6 +15,9 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.AccelerateInterpolator
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -45,7 +50,7 @@ class SplashScreenActivity : AppCompatActivity() {
             val serverIsOk = intent.getBooleanExtra("server_is_ok", false)
             if(serverIsOk){
                 val mainIntent = Intent(this@SplashScreenActivity, MainActivity::class.java)
-                Toast.makeText(context, "Dauth server launch successfully", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(context, "Dauth server launch successfully", Toast.LENGTH_SHORT).show()
                 startActivity(mainIntent)
                 // 关闭当前活动
                 finish()
@@ -61,11 +66,17 @@ class SplashScreenActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         // 设置布局
         setContentView(R.layout.splash_screen)
+
+        // 创建一个动画
+        var logoImageView = findViewById<ImageView>(R.id.splash_image)
+        startLogoAnimator(logoImageView)
+
         if(savedInstanceState == null){ //防止onCreate被多次调用
             // 检查并请求存储权限
             //if (isStoragePermissionGranted()) { //数据保存在/sdcard/Android目录中，需要调用此方法来进行授权，删除App，用户数据也会被保留
             //    launchMtvServer()
             //}
+
             //数据只保存在/sdcard/Android/com.tinyversespace.mtvapp/目录中 注意：删除App，用户数据也会被删除
             launchMtvServer()
         }
@@ -226,6 +237,29 @@ class SplashScreenActivity : AppCompatActivity() {
             }
             .setCancelable(false)
             .show()
+    }
+
+    private fun startLogoAnimator(logoImageView: ImageView){
+        // 创建 ValueAnimator 实现缩放动画
+        val scaleAnimator = ValueAnimator.ofFloat(0.5f, 1.0f)
+        scaleAnimator.duration = 2000L
+        scaleAnimator.interpolator = AccelerateInterpolator()
+
+        // 设置动画更新监听器
+        scaleAnimator.addUpdateListener { animator ->
+            val scale = animator.animatedValue as Float
+            logoImageView.scaleX = scale
+            logoImageView.scaleY = scale
+        }
+
+        // 设置动画重复模式为REVERSE，表示循环放大和缩小
+        scaleAnimator.repeatMode = ValueAnimator.REVERSE
+
+        // 设置动画重复次数为INFINITE，表示无限循环
+        scaleAnimator.repeatCount = ValueAnimator.INFINITE
+
+        // 启动动画
+        scaleAnimator.start()
     }
 
 }

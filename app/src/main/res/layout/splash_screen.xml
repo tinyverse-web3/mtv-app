@@ -7,8 +7,20 @@
         android:id="@+id/splash_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:src="@drawable/logo"
-        android:visibility="visible" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="130dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/logo" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/splash_image"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="150dp"
+        android:text="My Tinyverse Space"
+        android:textColor="@android:color/black"
+        android:textSize="30sp"
+        android:fontFamily="@font/alimama_dongfangdakai_regular" />
 
 </RelativeLayout>
