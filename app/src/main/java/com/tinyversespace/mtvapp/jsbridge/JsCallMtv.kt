@@ -95,7 +95,23 @@ class JsCallMtv(private val context: Context) {
         val mainActivity = context as MainActivity
         if (context is Activity) {
             // 进行生物识别验证
-            mainActivity.startBiometricVerify(REQUEST_CODE_BIOMETRIC_VERIFY)
+            val intent = Intent(context, BiometricLoginActivity::class.java)
+            intent.putExtra("request_code", REQUEST_CODE_BIOMETRIC_VERIFY)
+            context.startActivity(intent)
+            context.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out) // 添加淡入淡出动画效果
+        }
+    }
+
+    @JavascriptInterface
+    fun isBiometricsSetUp(callback: Callback) {
+        requestCodeMap[REQUEST_CODE_IS_BIOMETRIC_SET_UP] = callback
+        val mainActivity = context as MainActivity
+        if (context is Activity) {
+            // 应用是否开启了生物识别验证
+            val intent = Intent(context, BiometricLoginActivity::class.java)
+            intent.putExtra("request_code", REQUEST_CODE_IS_BIOMETRIC_SET_UP)
+            context.startActivity(intent)
+            context.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out) // 添加淡入淡出动画效果
         }
     }
 
@@ -103,12 +119,22 @@ class JsCallMtv(private val context: Context) {
     fun setupBiometrics(params: String, callback: Callback) {
         requestCodeMap[REQUEST_CODE_SET_UP_BIOMETRIC] = callback
         AppUser.fakeToken = params //清空之前的用户token
-        val mainActivity = context as MainActivity
         if (context is Activity) {
             // 设置生物识别验证
             val intent = Intent(context, BiometricLoginActivity::class.java)
             intent.putExtra("request_code", REQUEST_CODE_SET_UP_BIOMETRIC)
             context.startActivity(intent)
+            context.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out) // 添加淡入淡出动画效果
+        }
+    }
+
+    @JavascriptInterface
+    fun takePhoto(callback: Callback) {
+        requestCodeMap[REQUEST_CODE_BIOMETRIC_VERIFY] = callback
+        val mainActivity = context as MainActivity
+        if (context is Activity) {
+            // 进行拍照
+            mainActivity.takePhoto()
         }
     }
 
@@ -118,6 +144,7 @@ class JsCallMtv(private val context: Context) {
         const val REQUEST_CODE_QRCODE_SCAN: String = "1002"
         const val REQUEST_CODE_BIOMETRIC_VERIFY: String = "1003"
         const val REQUEST_CODE_SET_UP_BIOMETRIC: String = "1004"
+        const val REQUEST_CODE_IS_BIOMETRIC_SET_UP: String = "1005"
         val requestCodeMap = HashMap<String, Callback>()
     }
 }
