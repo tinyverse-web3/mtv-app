@@ -3,21 +3,21 @@ package com.tinyversespace.mtvapp.activities
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.net.http.SslError
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.os.Handler
-import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
@@ -33,23 +33,14 @@ import android.widget.Button
 import android.widget.PopupWindow
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.biometric.BiometricManager
-import androidx.biometric.BiometricPrompt
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import com.core.web.CallbackBean
 import com.core.web.JsBridgeWebView
 import com.core.web.base.BaseWebViewClient
 import com.tinyversespace.mtvapp.BuildConfig
 import com.tinyversespace.mtvapp.R
-import com.tinyversespace.mtvapp.biometric.AppUser
-import com.tinyversespace.mtvapp.biometric.BiometricPromptUtils
-import com.tinyversespace.mtvapp.biometric.CIPHERTEXT_WRAPPER
-import com.tinyversespace.mtvapp.biometric.CryptographyManager
-import com.tinyversespace.mtvapp.biometric.SHARED_PREFS_FILENAME
 import com.tinyversespace.mtvapp.jsbridge.JsCallMtv
 import com.tinyversespace.mtvapp.utils.GeneralUtils
 import com.tinyversespace.mtvapp.views.progress.LoadView
@@ -258,6 +249,14 @@ class MainActivity : AppCompatActivity() {
                 filePathCallback: ValueCallback<Array<Uri>>?,
                 fileChooserParams: FileChooserParams?
             ): Boolean {
+                fileChooser = filePathCallback
+
+                if(fileChooserParams?.isCaptureEnabled == true){//直接调用相机拍照
+                    takePhoto()
+                    return true
+                }
+
+                //弹出拍照或者进行文件选择对话框，让用户来决定是拍照还是选择相片
                 var selectFile = 0
                 var filetypes = fileChooserParams?.acceptTypes
                 if (filetypes != null){
@@ -265,8 +264,10 @@ class MainActivity : AppCompatActivity() {
                         selectFile = 1
                     }
                 }
-                fileChooser = filePathCallback
 
+                if((fileChooserParams?.isCaptureEnabled == true)){
+                    takePhoto()
+                }
                 if (selectFile == 1) {
                     // need select a image , first request camera permission
                     // 请求权限
@@ -317,6 +318,19 @@ class MainActivity : AppCompatActivity() {
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT
         )
+        // 设置 PopupWindow 点击事件监听
+        popupWindow.setTouchInterceptor(fun(_: View, event: MotionEvent): Boolean {
+            return if (event.action == MotionEvent.ACTION_OUTSIDE) {
+                // 当点击空白处时，关闭 PopupWindow 删除fileChooser
+                popupWindow.dismiss()
+                fileChooser?.onReceiveValue(null)
+                fileChooser = null
+                true
+            } else {
+                false
+            }
+        })
+        popupWindow.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         popupWindow.isOutsideTouchable = true
         popupWindow.showAtLocation(webView, Gravity.BOTTOM, 0, 0)
     }

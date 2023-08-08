@@ -143,7 +143,6 @@ class MainActivityBackup : AppCompatActivity() {
                 fileChooserParams: FileChooserParams
             ): Boolean {
                 fileChooser = filePathCallback
-                showFileChooser()
                 return true
             }
 

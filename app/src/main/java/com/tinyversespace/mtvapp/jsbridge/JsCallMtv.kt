@@ -22,7 +22,7 @@ class JsCallMtv(private val context: Context) {
     }
 
     @JavascriptInterface
-    fun nativeNoArgAndCallback(callback: Callback) {
+    fun nativeNoArgAndCallback(callback: Callback) { //测试使用
 //        startFingerActivity(object : ActivityResultCallback {
 //            override fun onResult(result: String) {
 //                // 处理返回结果
@@ -30,7 +30,8 @@ class JsCallMtv(private val context: Context) {
 //                callback.success()
 //            }
 //        })
-        startQrcodeScanActivity(callback)
+//       startQrcodeScanActivity(callback)
+        takePhoto()
         // 处理返回结果
         Toast.makeText(context, "调用原生无参数有回调方法", Toast.LENGTH_SHORT).show()
         callback.success()
@@ -129,8 +130,7 @@ class JsCallMtv(private val context: Context) {
     }
 
     @JavascriptInterface
-    fun takePhoto(callback: Callback) {
-        requestCodeMap[REQUEST_CODE_BIOMETRIC_VERIFY] = callback
+    fun takePhoto() {
         val mainActivity = context as MainActivity
         if (context is Activity) {
             // 进行拍照
