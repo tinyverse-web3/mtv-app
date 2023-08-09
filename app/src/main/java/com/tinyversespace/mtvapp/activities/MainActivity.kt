@@ -3,6 +3,7 @@ package com.tinyversespace.mtvapp.activities
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -63,6 +64,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var photoUri: Uri
     private var filetype : String = "*.*"
     private lateinit var jsCallMtv: JsCallMtv
+    private lateinit var homeFeatureString: Array<String>
 
 
     companion object {
@@ -163,6 +165,10 @@ class MainActivity : AppCompatActivity() {
         //var url = "https://webcam-test.com/"
         //val url = "https://dragonir.github.io/h5-scan-qrcode/#/"
         loadUrl(url)
+
+        //主页面url特征字符串：表示回到主页面
+        homeFeatureString = arrayOf("/home/space", "/unlock", "/index")
+
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -195,12 +201,17 @@ class MainActivity : AppCompatActivity() {
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         // TODO Auto-generated method stub
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (webView!!.canGoBack()) {
-                webView!!.goBack() //返回上一页面
+            if(!webView!!.canGoBack()){ //history中已经是最后一个页面了
+                promptUserForAction()
                 return true
-            } else {
-                exitProcess(0) //退出程序
             }
+            val webViewUrl = webView!!.url
+            if(containsSpecificValue(webViewUrl!!)){//已经是最后一个页面了，不能go back
+                promptUserForAction()
+            }else{//history中还有页面能go back
+                webView!!.goBack()
+            }
+            return true
         }
         return super.onKeyDown(keyCode, event)
     }
@@ -255,7 +266,7 @@ class MainActivity : AppCompatActivity() {
                     takePhoto()
                     return true
                 }
-
+1
                 //弹出拍照或者进行文件选择对话框，让用户来决定是拍照还是选择相片
                 var selectFile = 0
                 var filetypes = fileChooserParams?.acceptTypes
@@ -337,19 +348,19 @@ class MainActivity : AppCompatActivity() {
 
     fun takePhoto() {
         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        if (cameraIntent.resolveActivity(packageManager) != null) {
-            try {
-                photoFile = createImageFile()
-                photoUri = FileProvider.getUriForFile(
-                    this,
-                    BuildConfig.APPLICATION_ID + ".provider",
-                    photoFile
-                )
-                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
-                takePictureLauncher.launch(cameraIntent)
-            } catch (ex: IOException) {
-                ex.printStackTrace()
-            }
+        try {
+            photoFile = createImageFile()
+            photoUri = FileProvider.getUriForFile(
+                this,
+                BuildConfig.APPLICATION_ID + ".provider",
+                photoFile
+            )
+            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+            takePictureLauncher.launch(cameraIntent)
+        } catch (ex: IOException) {
+            ex.printStackTrace()
+            fileChooser?.onReceiveValue(null)
+            fileChooser = null
         }
     }
 
@@ -410,4 +421,28 @@ class MainActivity : AppCompatActivity() {
         // 获取带有时间戳的最终 URL
         return uri.toString()
     }
+
+    private fun promptUserForAction(){
+        AlertDialog.Builder(this)
+            .setTitle("提示")
+            .setMessage("已是最后一个页面，是否退出应用？")
+            .setPositiveButton("否") { dialog, _ ->
+                // 关闭对话框
+                dialog.dismiss()
+            }
+            .setNegativeButton("是") { dialog, _ ->
+                // 关闭对话框
+                dialog.dismiss()
+                // 退出应用
+                exitProcess(0)
+            }
+            .setCancelable(false)
+            .show()
+    }
+
+    private fun containsSpecificValue(input: String): Boolean {
+        return homeFeatureString.any { input.contains(it) }
+    }
+
 }
+
