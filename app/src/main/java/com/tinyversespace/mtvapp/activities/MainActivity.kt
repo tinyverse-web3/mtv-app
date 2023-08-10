@@ -3,9 +3,9 @@ package com.tinyversespace.mtvapp.activities
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
@@ -34,11 +34,14 @@ import android.widget.Button
 import android.widget.PopupWindow
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.core.web.JsBridgeWebView
+import com.core.web.JsInject
+import com.core.web.base.BaseWebView
 import com.core.web.base.BaseWebViewClient
 import com.tinyversespace.mtvapp.BuildConfig
 import com.tinyversespace.mtvapp.R
@@ -62,9 +65,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var popupWindow: PopupWindow
     private lateinit var photoFile: File
     private lateinit var photoUri: Uri
-    private var filetype : String = "*.*"
     private lateinit var jsCallMtv: JsCallMtv
     private lateinit var homeFeatureString: Array<String>
+    private var jsInject: JsInject? = null
 
 
     companion object {
@@ -158,6 +161,9 @@ class MainActivity : AppCompatActivity() {
         //初始化webView及设置webView
         webViewInit()
 
+        //初始化jsInject
+        jsInject = JsInject(webView!!)
+
         //加载主页面
         //val url = "https://service.tinyverse.space/test.html"
         var url = "https://dev.tinyverse.space/"
@@ -189,8 +195,8 @@ class MainActivity : AppCompatActivity() {
         //出现net::ERR_CACHE_MISS错误提示
         //使用缓存的方式是基于导航类型。正常页面加载的情况下将缓存内容。当导航返回,
         //内容不会恢复（重新加载生成）,而只是从缓存中取回内容
-        //webView!!.settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
-        ws.cacheMode = WebSettings.LOAD_NO_CACHE
+        webView!!.settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
+//        ws.cacheMode = WebSettings.LOAD_NO_CACHE
 
         //下载文件
         webView!!.setDownloadListener(imageDownloadListener)
@@ -223,9 +229,22 @@ class MainActivity : AppCompatActivity() {
                 view: WebView,
                 request: WebResourceRequest
             ): Boolean {
-                var newUrl = updateUrlTimestamp(request.url.toString())
-                webView!!.loadUrl(newUrl)
+                webView!!.loadUrl(request.url.toString())
                 return true
+            }
+
+            override fun onPageStarted(view: WebView?, url: String, favicon: Bitmap?) {
+                super.onPageStarted(view, url, favicon)
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
+                    (view as? BaseWebView)?.let { inject(it, url) } //注入JsBridge
+                }
+            }
+
+            override fun onPageFinished(view: WebView?, url: String) {
+                super.onPageFinished(view, url)
+                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {//注入JsBridge
+                    (view as? BaseWebView)?.let { inject(it, url) }
+                }
             }
 
             @SuppressLint("WebViewClientOnReceivedSslError")
@@ -440,8 +459,17 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun containsSpecificValue(input: String): Boolean {
+
+
+    private fun containsSpecificValue(input: String): Boolean { //判断Url是否包含特征字符串（即最后一页）
         return homeFeatureString.any { input.contains(it) }
+    }
+
+    private fun inject(webView: BaseWebView, url: String) { //注入JS方法
+        if (jsInject == null) {
+            jsInject = JsInject(webView)
+        }
+        webView.loadUrl("javascript:" + jsInject!!.injectJs())
     }
 
 }
