@@ -4,11 +4,11 @@ import android.content.Context
 import android.os.Bundle
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.util.Log
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import com.core.web.CallbackBean
+import com.kongzue.dialogx.dialogs.MessageDialog
 import com.tinyversespace.mtvapp.R
 import com.tinyversespace.mtvapp.biometric.AppUser
 import com.tinyversespace.mtvapp.biometric.BiometricPromptUtils
@@ -174,10 +174,12 @@ class BiometricLoginActivity : AppCompatActivity() {
     }
 
     private fun showEnableBiometricDialog() {
-        val alertDialog = AlertDialog.Builder(this)
-            .setTitle("应用生物识别未配置")
-            .setMessage("请解锁后在设置页面进行设置")
-            .setPositiveButton("确定") { _, _ ->
+        MessageDialog.build()
+            .setTitle("生物识别未配置")
+            .setMessage("请解锁后在设置页面进行配置")
+            .setCancelable(true)
+            .setOkButton("确定") { baseDialog, _ ->
+                baseDialog.dismiss()
                 val callback = JsCallMtv.requestCodeMap[activityRequestCode]
                 if(callback != null){
                     val message = "应用生物识别未配置"
@@ -186,16 +188,20 @@ class BiometricLoginActivity : AppCompatActivity() {
                     callback.success(CallbackBean(-3, message, data), isDelete)
                 }
                 finish()
-            }.create()
-        alertDialog.show()
+                false
+            }
+            .show()
     }
 
     //for biometric
     private fun showReEnableBiometricDialog() {
-        val alertDialog = AlertDialog.Builder(this)
-            .setTitle("设备生物识别凭据发生了变")
-            .setMessage("请解锁后在设置页面重新进行配置")
-            .setPositiveButton("确定") { _, _ ->
+
+        MessageDialog.build()
+            .setTitle("设备生物识别凭据已经改变")
+            .setMessage("请解锁应用后在设置页面重新进行配置")
+            .setCancelable(true)
+            .setOkButton("确定") { baseDialog, _ ->
+                baseDialog.dismiss()
                 val callback = JsCallMtv.requestCodeMap[activityRequestCode]
                 if(callback != null){
                     val message = "应用生物识别需要重新配置"
@@ -204,8 +210,9 @@ class BiometricLoginActivity : AppCompatActivity() {
                     callback.success(CallbackBean(-3, message, data), isDelete)
                 }
                 finish()
-            }.create()
-        alertDialog.show()
+                false
+            }
+            .show()
     }
 
     private fun isBiometricsSetUp(){

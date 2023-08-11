@@ -1,11 +1,9 @@
 package com.tinyversespace.mtvapp.activities
 
 import android.Manifest
-import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -15,7 +13,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
-import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.AccelerateInterpolator
 import android.widget.ImageView
 import android.widget.Toast
@@ -24,8 +21,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.kongzue.dialogx.dialogs.MessageDialog
 import com.tinyversespace.mtvapp.R
 import com.tinyversespace.mtvapp.service.MtvService
+import com.tinyversespace.mtvapp.utils.GeneralUtils
 import java.io.File
 import java.util.concurrent.CountDownLatch
 import kotlin.system.exitProcess
@@ -84,6 +83,9 @@ class SplashScreenActivity : AppCompatActivity() {
         //通过serverCompletedReceiver广播器来接收服务是否启动OK
         val filter = IntentFilter("$packageName.MTV_SERVER_LAUNCH")
         registerReceiver(serverCompletedReceiver, filter)
+
+        //初始化全局DilogX
+        GeneralUtils.dialogInit(this.applicationContext)
     }
 
 
@@ -163,20 +165,21 @@ class SplashScreenActivity : AppCompatActivity() {
                         launchMtvServer()
                     } else {
                         // 用户未授权 MANAGE_EXTERNAL_STORAGE 权限，弹出提示对话框
-                        AlertDialog.Builder(this@SplashScreenActivity)
+                        MessageDialog.build()
                             .setTitle("权限请求")
                             .setMessage("需要 MANAGE_EXTERNAL_STORAGE 权限才能正常使用应用，请前往设置授权。")
-                            .setPositiveButton("去授权") { dialog, _ ->
-                                // 跳转到应用设置页面
-                                dialog.cancel()
-                                authorizeAccessSdcard()
-                            }
-                            .setNegativeButton("退出应用") { dialog, _ ->
-                                // 用户选择退出应用
-                                dialog.cancel()
-                                finish()
-                            }
                             .setCancelable(false)
+                            .setOkButton("去授权") { baseDialog, _ ->
+                                baseDialog.dismiss()
+                                // 跳转到应用设置页面
+                                authorizeAccessSdcard()
+                                false
+                            }
+                            .setCancelButton("退出应用") { baseDialog, _ ->
+                                baseDialog.dismiss()
+                                finish()
+                                false
+                            }
                             .show()
                     }
                 }
@@ -218,24 +221,25 @@ class SplashScreenActivity : AppCompatActivity() {
     }
 
     private fun promptUserForAction(){
-        AlertDialog.Builder(this)
+        MessageDialog.build()
             .setTitle("提示")
             .setMessage("服务启动失败，是否重启应用？")
-            .setPositiveButton("重启") { dialog, _ ->
-                // 关闭对话框
-                dialog.dismiss()
+            .setCancelable(true)
+            .setOkButton("重启") { baseDialog, _ ->
+                baseDialog.dismiss()
                 // 重启应用
                 val intent = Intent(this, SplashScreenActivity::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                 startActivity(intent)
+                false
             }
-            .setNegativeButton("退出") { dialog, _ ->
+            .setCancelButton("是") { baseDialog, _ ->
                 // 关闭对话框
-                dialog.dismiss()
+                baseDialog.dismiss()
                 // 退出应用
                 exitProcess(0)
+                false
             }
-            .setCancelable(false)
             .show()
     }
 

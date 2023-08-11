@@ -8,6 +8,9 @@ import android.graphics.BitmapFactory
 import android.os.Environment
 import android.provider.MediaStore
 import android.widget.Toast
+import com.kongzue.dialogx.DialogX
+import com.kongzue.dialogx.style.MaterialStyle
+import com.kongzue.dialogxmaterialyou.style.MaterialYouStyle
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -81,6 +84,11 @@ object GeneralUtils {
                 timer.cancel()
             }
         }, duration.toLong())
+    }
+
+    fun dialogInit(context: Context){
+        DialogX.init(context)
+        DialogX.globalStyle = MaterialYouStyle.style()
     }
 
 }

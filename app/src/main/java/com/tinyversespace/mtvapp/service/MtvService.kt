@@ -1,12 +1,9 @@
 package com.tinyversespace.mtvapp.service
 
-import android.app.AlertDialog
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import android.widget.Toast
 import core.Core
-import kotlin.system.exitProcess
 
 
 class MtvService : Service() {

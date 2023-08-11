@@ -21,7 +21,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
 import android.view.WindowManager
 import android.webkit.DownloadListener
 import android.webkit.SslErrorHandler
@@ -34,7 +33,6 @@ import android.widget.Button
 import android.widget.PopupWindow
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -43,6 +41,7 @@ import com.core.web.JsBridgeWebView
 import com.core.web.JsInject
 import com.core.web.base.BaseWebView
 import com.core.web.base.BaseWebViewClient
+import com.kongzue.dialogx.dialogs.MessageDialog
 import com.tinyversespace.mtvapp.BuildConfig
 import com.tinyversespace.mtvapp.R
 import com.tinyversespace.mtvapp.jsbridge.JsCallMtv
@@ -153,9 +152,9 @@ class MainActivity : AppCompatActivity() {
             WindowManager.LayoutParams.FLAG_FULLSCREEN
         )
         //去掉标题栏
-        requestWindowFeature(Window.FEATURE_NO_TITLE)
         setContentView(R.layout.activity_main_webview)
         webView = findViewById<View>(R.id.webView) as JsBridgeWebView
+        //supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
 
 
         //初始化webView及设置webView
@@ -200,6 +199,10 @@ class MainActivity : AppCompatActivity() {
 
         //下载文件
         webView!!.setDownloadListener(imageDownloadListener)
+
+        //清除webview cache
+        webView!!.clearCache(true)
+        webView!!.clearHistory()
 
     }
 
@@ -441,21 +444,20 @@ class MainActivity : AppCompatActivity() {
         return uri.toString()
     }
 
-    private fun promptUserForAction(){
-        AlertDialog.Builder(this)
+    private fun promptUserForAction() {
+        MessageDialog.build()
             .setTitle("提示")
             .setMessage("已是最后一个页面，是否退出应用？")
-            .setPositiveButton("否") { dialog, _ ->
-                // 关闭对话框
-                dialog.dismiss()
+            .setCancelable(true)
+            .setOkButton("否") { baseDialog, _ ->
+                baseDialog.dismiss()
+                false
             }
-            .setNegativeButton("是") { dialog, _ ->
-                // 关闭对话框
-                dialog.dismiss()
-                // 退出应用
+            .setCancelButton("是") { baseDialog, _ ->
+                baseDialog.dismiss()
                 exitProcess(0)
+                false
             }
-            .setCancelable(false)
             .show()
     }
 
@@ -471,6 +473,8 @@ class MainActivity : AppCompatActivity() {
         }
         webView.loadUrl("javascript:" + jsInject!!.injectJs())
     }
+
+
 
 }
 

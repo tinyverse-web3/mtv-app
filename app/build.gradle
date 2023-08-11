@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId "com.tinyversespace.mtvapp"
-        minSdk 29
+        minSdk 26
         targetSdk 33
         versionCode 1
         versionName "1.0"
@@ -117,5 +117,10 @@ dependencies {
     //Biometric
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'androidx.biometric:biometric-ktx:1.2.0-alpha05'
+
+    //Dialog
+    def dialogX_version = "0.0.48"
+    implementation "com.kongzue.dialogx:DialogX:${dialogX_version}"
+    implementation "com.kongzue.dialogx.style:DialogXMaterialYouStyle:${dialogX_version}"
 
 }

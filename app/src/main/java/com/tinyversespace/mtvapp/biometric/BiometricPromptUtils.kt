@@ -68,7 +68,7 @@ object BiometricPromptUtils {
         }.build()
 
     fun callbackJs(activity: AppCompatActivity, requestCode: String, code: Int, result: String){
-        var message = "生物识别设置出错"
+        var message = "生物识别出错"
         val data: Any = result
         val isDelete = false
         val callback = JsCallMtv.requestCodeMap[requestCode]

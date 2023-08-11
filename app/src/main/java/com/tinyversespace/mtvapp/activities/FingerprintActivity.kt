@@ -1,18 +1,13 @@
 package com.tinyversespace.mtvapp.activities
 
 import android.Manifest
-import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.ContentResolver
-import android.content.ContentUris
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
 import android.widget.Button
 import android.widget.ImageView
@@ -29,9 +24,7 @@ import com.tinyversespace.mtvapp.R
 import com.tinyversespace.mtvapp.fragments.CameraXFragment
 import com.tinyversespace.mtvapp.fragments.MinutiaeFragment
 import com.tinyversespace.mtvapp.fragments.PreviewFragment
-import com.tinyversespace.mtvapp.jsbridge.JsCallMtv
 import com.tinyversespace.mtvapp.utils.PhotoItem
-import java.io.File
 
 
 class FingerprintActivity : AppCompatActivity(), CameraXFragment.OnPhotoTakenListener {
