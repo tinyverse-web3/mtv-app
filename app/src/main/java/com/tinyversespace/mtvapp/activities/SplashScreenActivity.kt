@@ -12,6 +12,8 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.view.animation.AccelerateInterpolator
 import android.widget.ImageView
@@ -228,12 +230,18 @@ class SplashScreenActivity : AppCompatActivity() {
             .setOkButton("重启") { baseDialog, _ ->
                 baseDialog.dismiss()
                 // 重启应用
-                val intent = Intent(this, SplashScreenActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                startActivity(intent)
+                // 延迟3秒后重新启动应用
+                val handler = Handler(Looper.getMainLooper())
+                handler.postDelayed({
+                    finish()
+                    val intent = Intent(this, SplashScreenActivity::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    startActivity(intent)
+                    exitProcess(0)
+                }, 3000)
                 false
             }
-            .setCancelButton("是") { baseDialog, _ ->
+            .setCancelButton("退出") { baseDialog, _ ->
                 // 关闭对话框
                 baseDialog.dismiss()
                 // 退出应用

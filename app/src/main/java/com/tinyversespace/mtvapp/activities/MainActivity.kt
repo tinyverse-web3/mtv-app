@@ -447,8 +447,8 @@ class MainActivity : AppCompatActivity() {
     private fun promptUserForAction() {
         MessageDialog.build()
             .setTitle("提示")
-            .setMessage("已是最后一个页面，是否退出应用？")
-            .setCancelable(true)
+            .setMessage("是否退出应用？")
+            .setCancelable(false)
             .setOkButton("否") { baseDialog, _ ->
                 baseDialog.dismiss()
                 false
