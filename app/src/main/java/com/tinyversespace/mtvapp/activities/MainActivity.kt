@@ -13,6 +13,8 @@ import android.net.http.SslError
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
 import android.view.Gravity
@@ -21,6 +23,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.view.WindowManager
 import android.webkit.DownloadListener
 import android.webkit.SslErrorHandler
@@ -67,6 +70,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var jsCallMtv: JsCallMtv
     private lateinit var homeFeatureString: Array<String>
     private var jsInject: JsInject? = null
+    private var isBackButtonClicked = false
+    private val resetDelayMillis = 2000L // 设置延迟时间，单位为毫秒
+    private var isBackPressedOnce = false
 
 
     companion object {
@@ -203,13 +209,29 @@ class MainActivity : AppCompatActivity() {
         //清除webview cache
         webView!!.clearCache(true)
         webView!!.clearHistory()
-
     }
 
     //重写onKeyDown(keyCode, event)方法 改写物理按键 返回的逻辑
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         // TODO Auto-generated method stub
         if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (isBackPressedOnce) {//连续点击两次退出应用
+                // 第二次点击返回按钮，弹出 Toast 并退出应用
+                Toast.makeText(this, "连续两次回退即退出MTV!!!", Toast.LENGTH_LONG).show()
+                finish()
+                exitProcess(0)
+            }else{
+                // 第一次点击返回按钮，设置标志位为 true，然后启动延迟重置
+                isBackPressedOnce = true
+                resetBackButtonClicksNumberFlagAfterDelay()
+            }
+            if(!isBackButtonClicked){//防止重复点击
+                // 第一次点击返回按钮，设置标志位为 true，然后启动延迟重置
+                isBackButtonClicked = true
+                resetBackButtonClickFlagAfterDelay()
+            }else{
+                return true
+            }
             if(!webView!!.canGoBack()){ //history中已经是最后一个页面了
                 promptUserForAction()
                 return true
@@ -249,7 +271,7 @@ class MainActivity : AppCompatActivity() {
                     (view as? BaseWebView)?.let { inject(it, url) }
                 }
             }
-
+            
             @SuppressLint("WebViewClientOnReceivedSslError")
             override fun onReceivedSslError(
                 view: WebView?,
@@ -258,6 +280,7 @@ class MainActivity : AppCompatActivity() {
             ) {
                 Log.d(TAG, "onReceivedSslError!")
                 handler.proceed() // Ignore SSL certificate errors
+                super.onReceivedSslError(view, handler, error)
             }
         }
 
@@ -451,6 +474,7 @@ class MainActivity : AppCompatActivity() {
             .setCancelable(false)
             .setOkButton("否") { baseDialog, _ ->
                 baseDialog.dismiss()
+                resetBackButtonClickFlagAfterDelay()
                 false
             }
             .setCancelButton("是") { baseDialog, _ ->
@@ -460,7 +484,6 @@ class MainActivity : AppCompatActivity() {
             }
             .show()
     }
-
 
 
     private fun containsSpecificValue(input: String): Boolean { //判断Url是否包含特征字符串（即最后一页）
@@ -474,7 +497,17 @@ class MainActivity : AppCompatActivity() {
         webView.loadUrl("javascript:" + jsInject!!.injectJs())
     }
 
-
-
+    private fun resetBackButtonClickFlagAfterDelay() {
+        val handler = Handler(Looper.getMainLooper())
+        handler.postDelayed({
+            isBackButtonClicked = false
+        }, resetDelayMillis)
+    }
+    private fun resetBackButtonClicksNumberFlagAfterDelay() {
+        val handler = Handler(Looper.getMainLooper())
+        handler.postDelayed({
+            isBackPressedOnce = false
+        }, 1000)
+    }
 }
 
