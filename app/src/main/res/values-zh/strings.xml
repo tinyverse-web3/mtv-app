@@ -95,6 +95,8 @@
     <string name="toast_folder_permission_approved_failed">权限未经过用户批准，应用可能无法使用！</string>
     <string name="toast_permission_denied">授权被拒绝</string>
     <string name="toast_capture_photo_failed">拍照失败</string>
+    <string name="toast_download_file_ok">下载成功</string>
+    <string name="toast_download_file_failed">下载失败</string>
 
 
 </resources>

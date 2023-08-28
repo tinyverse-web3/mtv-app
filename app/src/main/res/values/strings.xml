@@ -95,6 +95,8 @@
     <string name="toast_folder_permission_approved_failed">The permission is not approved by the user, and the application may not be available!</string>
     <string name="toast_permission_denied">Permission Denied</string>
     <string name="toast_capture_photo_failed">Failed to capture photo</string>
+    <string name="toast_download_file_ok">Download successful</string>
+    <string name="toast_download_file_failed">Download Failed</string>
 
 
 </resources>
