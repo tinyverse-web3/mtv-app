@@ -48,6 +48,7 @@ import com.kongzue.dialogx.dialogs.MessageDialog
 import com.tinyversespace.mtvapp.BuildConfig
 import com.tinyversespace.mtvapp.R
 import com.tinyversespace.mtvapp.jsbridge.JsCallMtv
+import com.tinyversespace.mtvapp.service.SocketConnect
 import com.tinyversespace.mtvapp.utils.GeneralUtils
 import com.tinyversespace.mtvapp.utils.language.MultiLanguageService
 import com.tinyversespace.mtvapp.views.progress.LoadView
@@ -180,6 +181,9 @@ class MainActivity : AppCompatActivity() {
 
         //主页面url特征字符串：表示回到主页面
         homeFeatureString = arrayOf("/home/space", "/unlock", "/index")
+
+        val client = SocketConnect()
+        client.startConnectServer(this)
 
     }
 
