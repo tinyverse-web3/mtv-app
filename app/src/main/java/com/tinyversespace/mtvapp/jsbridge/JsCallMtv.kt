@@ -152,7 +152,7 @@ class JsCallMtv(private val context: Context) {
             }
             editor.putString("language", params.trim()) // 'selectedLanguage' 是用户选择的新语言
             editor.apply()
-            val handler = Handler(Looper.getMainLooper())
+            //val handler = Handler(Looper.getMainLooper())
             //GeneralUtils.showToast(context, context.getString(R.string.toast_language_switched))
             callback.success(CallbackBean(0,  context.getString(R.string.language_switch_successfully), "success"), false)
 

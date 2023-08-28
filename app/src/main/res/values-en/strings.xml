@@ -50,7 +50,7 @@
 
     <!--for dialog-->
     <string name="dialog_loading">Loading</string>
-    <string name="dialog_load">Load</string>
+    <string name="dialog_load">Loading</string>
     <string name="dialog_title_tip">Prompt</string>
     <string name="dialog_info_exit_app">Do you want to exit the application?</string>
     <string name="dialog_button_ok">Yes</string>

@@ -48,7 +48,6 @@ import com.kongzue.dialogx.dialogs.MessageDialog
 import com.tinyversespace.mtvapp.BuildConfig
 import com.tinyversespace.mtvapp.R
 import com.tinyversespace.mtvapp.jsbridge.JsCallMtv
-import com.tinyversespace.mtvapp.service.SocketConnect
 import com.tinyversespace.mtvapp.utils.GeneralUtils
 import com.tinyversespace.mtvapp.utils.language.MultiLanguageService
 import com.tinyversespace.mtvapp.views.progress.LoadView
@@ -75,6 +74,8 @@ class MainActivity : AppCompatActivity() {
     private var isBackButtonClicked = false
     private val resetDelayMillis = 2000L // 设置延迟时间，单位为毫秒
     private var isBackPressedOnce = false
+    private var isNeedClearCache = false
+
 
 
     companion object {
@@ -148,8 +149,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 请求相机权限
-        requestCameraPermission()
+        //是否要清除Cache
+        isNeedClearCache = intent.getBooleanExtra("is_need_clear_cache", true)
 
         // 请求存储权限
         requestStoragePermission()
@@ -182,13 +183,22 @@ class MainActivity : AppCompatActivity() {
         //主页面url特征字符串：表示回到主页面
         homeFeatureString = arrayOf("/home/space", "/unlock", "/index")
 
-        val client = SocketConnect()
-        client.startConnectServer(this)
-
     }
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(MultiLanguageService.changeContextLocale(newBase))
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // 用户授权成功，执行拍照操作
+                takePic()
+            } else {
+                Toast.makeText(this, getString(R.string.toast_permission_denied), Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -216,8 +226,10 @@ class MainActivity : AppCompatActivity() {
         webView!!.setDownloadListener(imageDownloadListener)
 
         //清除webview cache
-        webView!!.clearCache(true)
-        webView!!.clearHistory()
+        if(isNeedClearCache){
+            webView!!.clearCache(true)
+            webView!!.clearHistory()
+        }
     }
 
     //重写onKeyDown(keyCode, event)方法 改写物理按键 返回的逻辑
@@ -401,6 +413,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun takePhoto() {
+        if (checkCameraPermission()) {
+            // 已经有相机权限，执行拍照操作
+            takePic()
+        } else {
+            // 没有相机权限，请求权限
+            requestCameraPermission()
+        }
+    }
+
+    private fun takePic(){
         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         try {
             photoFile = createImageFile()
@@ -441,28 +463,14 @@ class MainActivity : AppCompatActivity() {
         return File.createTempFile(imageFileName, ".jpg", storageDir)
     }
 
-    private fun requestCameraPermission(){
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            // 相机权限未授予，需要进行请求
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
-                // 如果之前用户拒绝过权限请求，可以在这里给出一些解释说明
-                // 可以显示一个对话框或者弹出一个提示，说明需要相机权限的原因
-            }
-            // 请求相机权限
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), CAMERA_PERMISSION_REQUEST_CODE)
-        } else {
-            // 相机权限已经授予，可以进行相机操作
-        }
-    }
-
     private var imageDownloadListener =
-        DownloadListener { url, _, _, mimetype, _ ->
+        DownloadListener { url, userAgent, contentDisposition, mimeType, _ ->
             when{
-                mimetype.lowercase(Locale.getDefault()).contains("image") -> {
-                    GeneralUtils.saveBase64ImageToGallery(this, null, url, mimetype)
+                mimeType.lowercase(Locale.getDefault()).contains("image") -> {
+                    GeneralUtils.saveBase64ImageToGallery(this, null, url, mimeType)
                 }
-                mimetype.lowercase(Locale.getDefault()).contains("application") -> {
-                    GeneralUtils.saveBase64ImageToGallery(this, null, url, mimetype)
+                mimeType.lowercase(Locale.getDefault()).contains("application") -> {
+                    GeneralUtils.saveFileToDownload(this, url, userAgent, contentDisposition, mimeType)
                 }
             }
         }
@@ -524,6 +532,16 @@ class MainActivity : AppCompatActivity() {
         handler.postDelayed({
             isBackPressedOnce = false
         }, 1000)
+    }
+
+    private fun checkCameraPermission(): Boolean {
+        val permission = Manifest.permission.CAMERA
+        return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun requestCameraPermission() {
+        val permission = arrayOf(Manifest.permission.CAMERA)
+        ActivityCompat.requestPermissions(this, permission, CAMERA_PERMISSION_REQUEST_CODE)
     }
 }
 

@@ -1,15 +1,20 @@
 package com.tinyversespace.mtvapp.utils
 
+import android.app.DownloadManager
+import android.content.BroadcastReceiver
 import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
+import android.webkit.URLUtil
 import android.widget.Toast
 import com.kongzue.dialogx.DialogX
-import com.kongzue.dialogx.style.MaterialStyle
 import com.kongzue.dialogxmaterialyou.style.MaterialYouStyle
 import com.tinyversespace.mtvapp.R
 import java.text.SimpleDateFormat
@@ -62,6 +67,55 @@ object GeneralUtils {
         }
     }
 
+    fun saveFileToDownload(context: Context, url: String, userAgent: String,
+                           contentDisposition: String, mimeType: String){
+        val request = DownloadManager.Request(Uri.parse(url))
+        request.setMimeType(mimeType)
+        request.addRequestHeader("User-Agent", userAgent)
+        request.setDescription("Downloading file...")
+        request.setTitle(URLUtil.guessFileName(url, contentDisposition, mimeType))
+        request.allowScanningByMediaScanner()
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, addTimestampSuffixToFileName(URLUtil.guessFileName(url, contentDisposition, mimeType)))
+
+        val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        val downloadId = downloadManager.enqueue(request)
+
+        // 注册下载完成广播接收器
+        val onComplete = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                val receivedId = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+                if (receivedId == downloadId) {
+                    val query = DownloadManager.Query()
+                    query.setFilterById(downloadId)
+                    val cursor = downloadManager.query(query)
+                    if (cursor.moveToFirst()) {
+                        val status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
+                        if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                            // 下载成功
+                            showToast(context!!,context.getString(R.string.toast_download_file_ok))
+                        } else {
+                            // 下载失败
+                            showToast(context!!,context.getString(R.string.toast_download_file_failed))
+                        }
+                    }
+                    cursor.close()
+                }
+            }
+        }
+        context.registerReceiver(receiver, onComplete)
+
+    }
+
+    private fun addTimestampSuffixToFileName(fileName: String): String {
+        val timestamp = SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault()).format(Date())
+        val extension = fileName.substringAfterLast(".", "")
+        val baseName = fileName.substringBeforeLast(".")
+
+        return "$baseName-$timestamp.$extension"
+    }
+
      fun showToast(context: Context, message: String) {
         Toast.makeText(context, message, Toast.LENGTH_LONG).show()
     }
@@ -70,6 +124,8 @@ object GeneralUtils {
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         return "IMG_$timeStamp"
     }
+
+
 
     fun showToast(context: Context, message: String, duration: Int) {
         val toast = Toast.makeText(context, message, Toast.LENGTH_LONG)

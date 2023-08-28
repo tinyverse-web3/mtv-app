@@ -15,6 +15,7 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.util.Log
 import android.view.animation.AccelerateInterpolator
 import android.widget.ImageView
 import android.widget.Toast
@@ -26,8 +27,19 @@ import androidx.core.content.ContextCompat
 import com.kongzue.dialogx.dialogs.MessageDialog
 import com.tinyversespace.mtvapp.R
 import com.tinyversespace.mtvapp.service.MtvService
+import com.tinyversespace.mtvapp.service.SocketConnect
 import com.tinyversespace.mtvapp.utils.GeneralUtils
 import com.tinyversespace.mtvapp.utils.language.MultiLanguageService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.ResponseBody
 import java.io.File
 import java.util.concurrent.CountDownLatch
 import kotlin.system.exitProcess
@@ -44,6 +56,8 @@ class SplashScreenActivity : AppCompatActivity() {
         val permissions = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
         lateinit var requestPermissionLauncher : ActivityResultLauncher<Intent>
         private lateinit var latch: CountDownLatch
+        private var isNeedClearWebCache : Boolean = false
+        private const val TAG = "SplashScreenActivity"
     }
 
     private val serverCompletedReceiver = object : BroadcastReceiver() {
@@ -52,6 +66,7 @@ class SplashScreenActivity : AppCompatActivity() {
             val serverIsOk = intent.getBooleanExtra("server_is_ok", false)
             if(serverIsOk){
                 val mainIntent = Intent(this@SplashScreenActivity, MainActivity::class.java)
+                mainIntent.putExtra("is_need_clear_cache",  isNeedClearWebCache)
                 //Toast.makeText(context, getString(R.string.toast_dauth_launch_success), Toast.LENGTH_SHORT).show()
                 startActivity(mainIntent)
                 // 关闭当前活动
@@ -80,7 +95,9 @@ class SplashScreenActivity : AppCompatActivity() {
             //}
 
             //数据只保存在/sdcard/Android/com.tinyversespace.mtvapp/目录中 注意：删除App，用户数据也会被删除
+            isNeedClearCache()
             launchMtvServer()
+            launchSocketServer()
         }
         // 注册广播接收器
         //通过serverCompletedReceiver广播器来接收服务是否启动OK
@@ -113,6 +130,12 @@ class SplashScreenActivity : AppCompatActivity() {
             putExtra("mtv_root_path", mtvRootPath)
         }
         startService(serviceIntent)
+    }
+
+    private fun launchSocketServer(){
+        // 启动后台服务
+        val socketServiceIntent = Intent(this@SplashScreenActivity, SocketConnect::class.java)
+        startService(socketServiceIntent)
     }
 
     private fun createFolderIfNotExists() : File{
@@ -278,6 +301,56 @@ class SplashScreenActivity : AppCompatActivity() {
 
         // 启动动画
         scaleAnimator.start()
+    }
+
+    private suspend fun getVersionFileContent(url: String): String {
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url(url)
+            .build()
+
+        try {
+            val response: Response = client.newCall(request).execute()
+            val responseBody: ResponseBody? = response.body()
+
+            if (responseBody != null) {
+                val versionContent = responseBody.string()
+                responseBody.close() // 关闭资源
+                return versionContent
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return ""
+        }
+        return ""
+    }
+
+    private fun isNeedClearCache() {
+        var versionUrl = "https://dev.tinyverse.space/version.txt"
+       GlobalScope.launch(Dispatchers.IO){
+            val tvsVersionOnLineStr = getVersionFileContent(versionUrl)
+            // 等待网络请求返回
+            var tvsVersionOnLine = 0;
+            if(tvsVersionOnLineStr.isNullOrEmpty()){
+                tvsVersionOnLine = 0;
+            }else{
+                tvsVersionOnLine = tvsVersionOnLineStr.toInt()
+            }
+           Log.i(TAG, "current web page version: $tvsVersionOnLineStr")
+
+            val sharedPrefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+            var tvsVersionSP = sharedPrefs.getInt("version", 0)
+
+            if(tvsVersionOnLine > tvsVersionSP){
+                val editor = sharedPrefs.edit()
+                editor.putInt("version", tvsVersionOnLine)
+                editor.apply()
+                isNeedClearWebCache = true
+            }else {
+                isNeedClearWebCache = false
+            }
+        }
+
     }
 
 }

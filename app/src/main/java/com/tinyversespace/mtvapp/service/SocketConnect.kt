@@ -1,10 +1,15 @@
 package com.tinyversespace.mtvapp.service
 
+import android.app.Service
 import android.content.Context
+import android.content.Intent
 import android.os.Handler
+import android.os.IBinder
 import android.os.Looper
 import android.widget.Toast
 import com.google.gson.Gson
+import com.tinyversespace.mtvapp.utils.language.MultiLanguageService
+import core.Core
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -27,8 +32,28 @@ val alias:      String,
 val timeStamp:  Long,
 val content:    String)
 
-class SocketConnect {
-    private val mainHandler = Handler(Looper.getMainLooper())
+class SocketConnect: Service(){
+
+    private lateinit var mainHandler : Handler
+
+    override fun onCreate() {
+        super.onCreate()
+        // 在此处进行服务初始化操作
+        mainHandler = Handler(Looper.getMainLooper())
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // 在此处执行后台任务逻辑，例如网络请求、数据处理等
+        Thread{
+            try{
+                startConnectServer(this)
+            } catch (e: Exception){
+                e.printStackTrace()
+            }
+        }.start()
+        // START_STICKY 表示服务被杀死后会自动重启
+        return START_STICKY
+    }
 
     @OptIn(DelicateCoroutinesApi::class)
     @Throws(IOException::class)
@@ -36,8 +61,6 @@ class SocketConnect {
         val port = 8080
         val serverSocket = ServerSocket(port)
         println("Server listening on port $port")
-
-
         GlobalScope.launch(Dispatchers.IO) {
             while (true) {
                 val clientSocket = serverSocket.accept()
@@ -103,6 +126,15 @@ class SocketConnect {
         }
     }
 
+    override fun onBind(intent: Intent?): IBinder? {
+        // 如果服务不提供绑定功能，返回 null
+        return null
+    }
 
-   }
+    override fun onDestroy() {
+        super.onDestroy()
+        // 在此处进行服务销毁操作
+    }
+
+}
 
