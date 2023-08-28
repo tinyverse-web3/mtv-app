@@ -20,8 +20,8 @@
 
     <string name="enable_autofocus">Autofocus On</string>
     <string name="disable_autofocus">Autofocus Off</string>
-    <string name="button_take_pic">take picture</string>
-    <string name="button_select_pic">select image</string>
+    <string name="button_take_pic">Take a picture</string>
+    <string name="button_select_pic">Select an image</string>
     <string name="button_album">Album</string>
 
     <!-- for fingerprint -->
@@ -62,7 +62,7 @@
 
 
     <!-- for qrcode scan -->
-    <string name="qrcode_button_scan">Scan It</string>
+    <string name="qrcode_button_scan">Scan it</string>
     <string name="qrcode_scan_prompt_info_ok">success</string>
     <string name="qrcode_scan_content_not_scanned">Content not scanned</string>
 
@@ -86,7 +86,7 @@
     <string name="toast_back_twice_exit_mtv">Click the back button twice to exit App</string>
     <string name="toast_dauth_launch_success">Dauth server launch successfully</string>
     <string name="toast_dauth_launch_failed">Dauth server launch failed!!!</string>
-    <string name="toast_sdcard_permission_ok">sdcard permission granted</string>
+    <string name="toast_sdcard_permission_ok">Sdcard permission granted</string>
     <string name="toast_sdcard_permission_failed">The authorization of the sdcard failed, and the write and delete operations cannot be performed</string>
     <string name="toast_mtv_folder_created_ok">Server storage folder created successfully</string>
     <string name="toast_mtf_folder_created_failed">Server storage folder created failed</string>

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MTVApp</string>
+    <string name="app_name">TVS</string>
     <string name="app_full_name">My TinyVerse Space</string>
     <string name="action_settings">Settings</string>
     <!-- Strings used for fragments for navigation -->
@@ -20,9 +20,9 @@
 
     <string name="enable_autofocus">Autofocus On</string>
     <string name="disable_autofocus">Autofocus Off</string>
-    <string name="button_take_pic">take picture</string>
-    <string name="button_select_pic">select image</string>
-    <string name="button_album">album</string>
+    <string name="button_take_pic">Take a picture</string>
+    <string name="button_select_pic">Select an image</string>
+    <string name="button_album">Album</string>
 
     <!-- for fingerprint -->
     <string name="take_fingerprint_pic_prompt">Take the 1st fingerprint photo</string>
@@ -31,9 +31,9 @@
 
 
     <!-- for biometric   -->
-    <string name="prompt_info_title">MTV Authentication</string>
+    <string name="prompt_info_title">TinyVerse Space</string>
     <string name="prompt_info_subtitle">Please login to get access</string>
-    <string name="prompt_info_description">MTV is using Android biometric authentication</string>
+    <string name="prompt_info_description">TVS is using Android biometric authentication</string>
     <string name="prompt_info_use_app_password">Use app password</string>
     <string name="prompt_info_bio_set_ok">Biometrics setup successful</string>
     <string name="toast_no_bio_registered">The user cannot be authenticated because no biometric or device credentials are registered</string>
@@ -62,7 +62,7 @@
 
 
     <!-- for qrcode scan -->
-    <string name="qrcode_button_scan">Scan It</string>
+    <string name="qrcode_button_scan">Scan it</string>
     <string name="qrcode_scan_prompt_info_ok">success</string>
     <string name="qrcode_scan_content_not_scanned">Content not scanned</string>
 
@@ -83,16 +83,16 @@
     <string name="toast_language_switched">Language has been switched</string>
     <string name="language_switch_successfully">Language switch successful</string>
     <string name="language_switch_failed">Language switch failed</string>
-    <string name="toast_back_twice_exit_mtv">Click the back button twice to exit MTV</string>
+    <string name="toast_back_twice_exit_mtv">Click the back button twice to exit App</string>
     <string name="toast_dauth_launch_success">Dauth server launch successfully</string>
     <string name="toast_dauth_launch_failed">Dauth server launch failed!!!</string>
-    <string name="toast_sdcard_permission_ok">sdcard permission granted</string>
+    <string name="toast_sdcard_permission_ok">Sdcard permission granted</string>
     <string name="toast_sdcard_permission_failed">The authorization of the sdcard failed, and the write and delete operations cannot be performed</string>
-    <string name="toast_mtv_folder_created_ok">MTV server storage folder created successfully</string>
-    <string name="toast_mtf_folder_created_failed">MTV server storage folder created failed</string>
+    <string name="toast_mtv_folder_created_ok">Server storage folder created successfully</string>
+    <string name="toast_mtf_folder_created_failed">Server storage folder created failed</string>
     <string name="toast_del_pic_ok">Successes to delete photo</string>
     <string name="toast_del_pic_failed">Failed to delete photo</string>
-    <string name="toast_folder_permission_approved_failed">The permission is not approved by the user, and the application may not be available!!!</string>
+    <string name="toast_folder_permission_approved_failed">The permission is not approved by the user, and the application may not be available!</string>
     <string name="toast_permission_denied">Permission Denied</string>
     <string name="toast_capture_photo_failed">Failed to capture photo</string>
 
