@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">TVS</string>
-    <string name="app_full_name">My TinyVerse Space</string>
+    <string name="app_full_name">我的芥子空间</string>
     <string name="action_settings">配置</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">第一个片段</string>
@@ -25,13 +25,13 @@
     <string name="button_album">相册</string>
 
     <!-- for fingerprint -->
-    <string name="take_fingerprint_pic_prompt">拍照第 1 张指纹照片</string>
+    <string name="take_fingerprint_pic_prompt">拍照第1张指纹照片</string>
 
 
 
 
     <!-- for biometric   -->
-    <string name="prompt_info_title">TinyVerse Space</string>
+    <string name="prompt_info_title">芥子空间</string>
     <string name="prompt_info_subtitle">Please login to get access</string>
     <string name="prompt_info_description">正在使用Android生物识别系统</string>
     <string name="prompt_info_use_app_password">使用密码</string>
