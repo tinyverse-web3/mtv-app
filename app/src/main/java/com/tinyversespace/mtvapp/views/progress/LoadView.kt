@@ -17,7 +17,7 @@ object LoadView {
         val tvShow: TextView = avLoadingIndicatorView.findViewById<TextView>(R.id.tvShow)
         val circleProgress =
             avLoadingIndicatorView!!.findViewById<WebViewCircleProgress>(R.id.progress_bar)
-        tvShow.text = "加载$msg%"
+        tvShow.text = context.getString(R.string.dialog_load) + " $msg%"
         if (dialog != null) {
             dialog!!.setContentView(avLoadingIndicatorView)
             dialog!!.setCanceledOnTouchOutside(false)
@@ -29,7 +29,7 @@ object LoadView {
                 }
             }
         } else {
-            Toast.makeText(context, "动画dialog初始化失败", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, context.getString(R.string.dialog_animation_load_failed), Toast.LENGTH_LONG).show()
         }
     }
 

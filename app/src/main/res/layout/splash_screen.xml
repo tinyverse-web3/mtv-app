@@ -18,7 +18,7 @@
         android:layout_below="@id/splash_image"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="150dp"
-        android:text="My Tinyverse Space"
+        android:text="@string/app_full_name"
         android:textColor="@android:color/black"
         android:textSize="30sp"
         android:fontFamily="@font/alimama_dongfangdakai_regular" />

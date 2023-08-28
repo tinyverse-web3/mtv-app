@@ -7,6 +7,7 @@ import com.ailiwean.core.Result
 import com.ailiwean.core.view.style2.NBZxingView
 import com.ailiwean.core.zxing.ScanTypeConfig
 import com.google.android.cameraview.AspectRatio
+import com.tinyversespace.mtvapp.R
 
 class QrcodeScanView @JvmOverloads constructor(
 
@@ -56,7 +57,7 @@ class QrcodeScanView @JvmOverloads constructor(
 
         override fun resultBackFile(content: com.ailiwean.core.zxing.core.Result?) {
             if (content == null)
-                Toast.makeText(context, "未扫描到内容", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context,  context.getString(R.string.qrcode_scan_content_not_scanned), Toast.LENGTH_SHORT).show()
             else {
                 onCallBackStringMac.stringMac(content.toString())
                 Toast.makeText(context, content.text, Toast.LENGTH_SHORT).show()

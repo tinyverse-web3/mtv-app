@@ -17,6 +17,7 @@ import com.tinyversespace.mtvapp.biometric.CryptographyManager
 import com.tinyversespace.mtvapp.biometric.SHARED_PREFS_FILENAME
 import com.tinyversespace.mtvapp.jsbridge.JsCallMtv
 import com.tinyversespace.mtvapp.utils.GeneralUtils
+import com.tinyversespace.mtvapp.utils.language.MultiLanguageService
 import java.security.KeyStore
 import javax.crypto.Cipher
 
@@ -69,11 +70,15 @@ class BiometricLoginActivity : AppCompatActivity() {
         }
     }
 
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(MultiLanguageService.changeContextLocale(newBase))
+    }
+
     private fun showBiometricPromptForEncryption() {
         val canAuthenticate = BiometricManager.from(applicationContext).canAuthenticate(
             BiometricManager.Authenticators.BIOMETRIC_WEAK)
         if (canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS) {
-            val secretKeyName = getString(R.string.secret_key_name)
+            val secretKeyName = GeneralUtils.secretKeyName
             var cipher: Cipher = try {
                 cryptographyManager.getInitializedCipherForEncryption(secretKeyName)
             }catch (e: KeyPermanentlyInvalidatedException){
@@ -89,7 +94,7 @@ class BiometricLoginActivity : AppCompatActivity() {
             val promptInfo = BiometricPromptUtils.createPromptInfo(this)
             biometricPrompt.authenticate(promptInfo, BiometricPrompt.CryptoObject(cipher))
         }else{
-            GeneralUtils.showToast(this, "用户无法进行身份验证，因为没有注册生物识别或设备凭据。", 15 * 1000)//15秒
+            GeneralUtils.showToast(this, getString(R.string.toast_no_bio_registered), 15 * 1000)//15秒
             finish()
         }
     }
@@ -108,7 +113,7 @@ class BiometricLoginActivity : AppCompatActivity() {
                 )
                 val callback = JsCallMtv.requestCodeMap[requestCode]
                 if(callback != null){
-                    val message = "生物识别设置成功"
+                    val message = getString(R.string.prompt_info_bio_set_ok)
                     val data: Any = "success"
                     val isDelete = false
                     callback.success(CallbackBean(0, message, data), isDelete)
@@ -124,7 +129,7 @@ class BiometricLoginActivity : AppCompatActivity() {
             val canAuthenticate = BiometricManager.from(applicationContext).canAuthenticate(
                 BiometricManager.Authenticators.BIOMETRIC_WEAK)
             if (canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS) {
-                val secretKeyName = getString(R.string.secret_key_name)
+                val secretKeyName = GeneralUtils.secretKeyName
                 var cipher: Cipher
                 try {
                     cipher = cryptographyManager.getInitializedCipherForDecryption(
@@ -144,7 +149,7 @@ class BiometricLoginActivity : AppCompatActivity() {
                 val promptInfo = BiometricPromptUtils.createPromptInfo(this)
                 biometricPrompt.authenticate(promptInfo, BiometricPrompt.CryptoObject(cipher))
             }else{
-                GeneralUtils.showToast(this, "用户无法进行身份验证，因为没有注册生物识别或设备凭据。", 15 * 1000)//15秒
+                GeneralUtils.showToast(this, getString(R.string.toast_no_bio_registered), 15 * 1000)//15秒
                 finish()
             }
         }
@@ -163,7 +168,7 @@ class BiometricLoginActivity : AppCompatActivity() {
                 // and therefore, it's a real token.
                 val callback = JsCallMtv.requestCodeMap[requestCode]
                 if(callback != null){
-                    val message = "生物识别认证成功"
+                    val message = getString(R.string.prompt_info_bio_verify_ok)
                     val data: Any = plaintext
                     val isDelete = false
                     callback.success(CallbackBean(0, message, data), isDelete)
@@ -175,15 +180,15 @@ class BiometricLoginActivity : AppCompatActivity() {
 
     private fun showEnableBiometricDialog() {
         MessageDialog.build()
-            .setTitle("生物识别未配置")
-            .setMessage("请解锁后在设置页面进行配置")
+            .setTitle(getString(R.string.prompt_info_bio_not_configured))
+            .setMessage(getString(R.string.prompt_info_bio_unlock_to_configured))
             .setCancelable(true)
-            .setOkButton("确定") { baseDialog, _ ->
+            .setOkButton(getString(R.string.dialog_button_confirm)) { baseDialog, _ ->
                 baseDialog.dismiss()
                 val callback = JsCallMtv.requestCodeMap[activityRequestCode]
                 if(callback != null){
-                    val message = "应用生物识别未配置"
-                    val data: Any = "应用生物识别未配置"
+                    val message = getString(R.string.prompt_info_bio_not_configured)
+                    val data: Any = getString(R.string.prompt_info_bio_not_configured)
                     val isDelete = false
                     callback.success(CallbackBean(-3, message, data), isDelete)
                 }
@@ -197,15 +202,15 @@ class BiometricLoginActivity : AppCompatActivity() {
     private fun showReEnableBiometricDialog() {
 
         MessageDialog.build()
-            .setTitle("设备生物识别凭据已经改变")
-            .setMessage("请解锁应用后在设置页面重新进行配置")
+            .setTitle(getString(R.string.credentials_have_changed))
+            .setMessage(getString(R.string.prompt_info_bio_unlock_to_reconfigured))
             .setCancelable(true)
-            .setOkButton("确定") { baseDialog, _ ->
+            .setOkButton(getString(R.string.dialog_button_confirm)) { baseDialog, _ ->
                 baseDialog.dismiss()
                 val callback = JsCallMtv.requestCodeMap[activityRequestCode]
                 if(callback != null){
-                    val message = "应用生物识别需要重新配置"
-                    val data: Any = "应用生物识别需要重新配置"
+                    val message = getString(R.string.prompt_info_app_bio_reconfigure)
+                    val data: Any = getString(R.string.prompt_info_app_bio_reconfigure)
                     val isDelete = false
                     callback.success(CallbackBean(-3, message, data), isDelete)
                 }
@@ -218,14 +223,14 @@ class BiometricLoginActivity : AppCompatActivity() {
     private fun isBiometricsSetUp(){
         val callback = JsCallMtv.requestCodeMap[activityRequestCode]
         if(callback != null){
-            var message = "应用生物识别已配置"
-            var data: Any = "应用生物识别已配置"
+            var message = getString(R.string.prompt_info_bio_have_configured)
+            var data: Any = getString(R.string.prompt_info_bio_have_configured)
             val isDelete = false
             if( ciphertextWrapper != null){
                 callback.success(CallbackBean(0, message, data), isDelete)
             }else{
-                message = "应用生物识别未配置"
-                data = "应用生物识别未配置"
+                message = getString(R.string.prompt_info_bio_not_configured)
+                data = getString(R.string.prompt_info_bio_not_configured)
                 callback.success(CallbackBean(-3, message, data), isDelete)
             }
         }

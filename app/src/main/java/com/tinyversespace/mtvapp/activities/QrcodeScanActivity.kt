@@ -15,6 +15,7 @@ import com.core.web.CallbackBean
 import com.google.android.cameraview.AspectRatio
 import com.tinyversespace.mtvapp.R
 import com.tinyversespace.mtvapp.jsbridge.JsCallMtv
+import com.tinyversespace.mtvapp.utils.language.MultiLanguageService
 import com.tinyversespace.mtvapp.views.QrcodeScanView
 import com.zhihu.matisse.Matisse
 import com.zhihu.matisse.MimeType
@@ -33,6 +34,10 @@ class QrcodeScanActivity : AppCompatActivity(){
         initView()
     }
 
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(MultiLanguageService.changeContextLocale(newBase))
+    }
+
     companion object {
         fun startSelf(context: Context) {
             context.startActivity(Intent(context, QrcodeScanActivity::class.java))
@@ -41,14 +46,14 @@ class QrcodeScanActivity : AppCompatActivity(){
 
     private fun initView() {
 
-        findViewById<TextView>(R.id.vTitle).text = "扫一扫"
+        findViewById<TextView>(R.id.vTitle).text = getString(R.string.qrcode_button_scan)
 
         findViewById<View>(R.id.vLeftImage)
             .setOnClickListener { v: View? ->
                 finish()
             }
 
-        findViewById<TextView>(R.id.vRightTextView).text = "相册"
+        findViewById<TextView>(R.id.vRightTextView).text = getString(R.string.button_album)
         findViewById<TextView>(R.id.vRightTextView)
             .setOnClickListener { v: View? ->
                 if (!checkPermissionRW()) {
@@ -70,7 +75,7 @@ class QrcodeScanActivity : AppCompatActivity(){
             override fun stringMac(text: String) {
                 val callback = JsCallMtv.requestCodeMap[activityRequestCode]
                 if(callback != null){
-                    val message = "成功"
+                    val message = getString(R.string.qrcode_scan_prompt_info_ok)
                     val data: Any = text
                     val isDelete = false
                     callback.success(CallbackBean(0, message, data), isDelete)

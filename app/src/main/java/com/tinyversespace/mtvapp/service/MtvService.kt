@@ -1,16 +1,21 @@
 package com.tinyversespace.mtvapp.service
 
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.os.IBinder
+import com.tinyversespace.mtvapp.utils.language.MultiLanguageService
 import core.Core
 
 
 class MtvService : Service() {
-
     override fun onCreate() {
         super.onCreate()
         // 在此处进行服务初始化操作
+    }
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(MultiLanguageService.changeContextLocale(newBase))
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -43,6 +48,5 @@ class MtvService : Service() {
     }
 
     private fun createRootDir(){
-
     }
 }

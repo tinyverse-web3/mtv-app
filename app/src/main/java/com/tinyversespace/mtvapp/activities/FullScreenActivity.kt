@@ -1,5 +1,6 @@
 package com.tinyversespace.mtvapp.activities
 
+import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.view.MotionEvent
@@ -11,6 +12,7 @@ import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.tinyversespace.mtvapp.R
+import com.tinyversespace.mtvapp.utils.language.MultiLanguageService
 
 class FullScreenActivity : AppCompatActivity() {
 
@@ -44,6 +46,10 @@ class FullScreenActivity : AppCompatActivity() {
         // 设置全屏展示
         window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
         supportActionBar?.hide()
+    }
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(MultiLanguageService.changeContextLocale(newBase))
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {

@@ -22,7 +22,7 @@
     <string name="disable_autofocus">Autofocus Off</string>
     <string name="button_take_pic">take picture</string>
     <string name="button_select_pic">select image</string>
-    <string name="button_album">album</string>
+    <string name="button_album">Album</string>
 
     <!-- for fingerprint -->
     <string name="take_fingerprint_pic_prompt">Take the 1st fingerprint photo</string>

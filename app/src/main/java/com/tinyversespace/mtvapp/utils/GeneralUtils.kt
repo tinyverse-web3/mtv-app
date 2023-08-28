@@ -11,6 +11,7 @@ import android.widget.Toast
 import com.kongzue.dialogx.DialogX
 import com.kongzue.dialogx.style.MaterialStyle
 import com.kongzue.dialogxmaterialyou.style.MaterialYouStyle
+import com.tinyversespace.mtvapp.R
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -54,14 +55,14 @@ object GeneralUtils {
             outputStream?.close()
 
 //            showToast(context, "Image saved to gallery")
-            showToast(context, "图片已经保存到相册中")
+            showToast(context, context.getString(R.string.toast_pic_have_saved))
         } catch (e: Exception) {
             // showToast(context, "Failed to save image to gallery")
-            showToast(context, "图片保存失败：" + e.localizedMessage)
+            showToast(context, context.getString(R.string.toast_pic_failed_save_pic) + e.localizedMessage)
         }
     }
 
-     private fun showToast(context: Context, message: String) {
+     fun showToast(context: Context, message: String) {
         Toast.makeText(context, message, Toast.LENGTH_LONG).show()
     }
 
@@ -90,5 +91,7 @@ object GeneralUtils {
         DialogX.init(context)
         DialogX.globalStyle = MaterialYouStyle.style()
     }
+
+    var secretKeyName = "mtv_biometric_encryption_key"
 
 }

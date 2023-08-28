@@ -3,6 +3,7 @@ package com.tinyversespace.mtvapp.activities
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -23,7 +24,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
 import android.view.WindowManager
 import android.webkit.DownloadListener
 import android.webkit.SslErrorHandler
@@ -49,6 +49,7 @@ import com.tinyversespace.mtvapp.BuildConfig
 import com.tinyversespace.mtvapp.R
 import com.tinyversespace.mtvapp.jsbridge.JsCallMtv
 import com.tinyversespace.mtvapp.utils.GeneralUtils
+import com.tinyversespace.mtvapp.utils.language.MultiLanguageService
 import com.tinyversespace.mtvapp.views.progress.LoadView
 import java.io.File
 import java.io.IOException
@@ -86,7 +87,7 @@ class MainActivity : AppCompatActivity() {
                 showFileChooserDialog()
             } else {
                 // 权限被拒绝
-                Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_permission_denied), Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -182,6 +183,10 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(MultiLanguageService.changeContextLocale(newBase))
+    }
+
     @SuppressLint("SetJavaScriptEnabled")
     fun webViewInit() {
         //在此处添加提供给JS调用的接口，可以添加多个接口类每增加一个接口类：webView.addJavascriptInterface(new ToJSAPIClass(this))；
@@ -217,7 +222,7 @@ class MainActivity : AppCompatActivity() {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (isBackPressedOnce) {//连续点击两次退出应用
                 // 第二次点击返回按钮，弹出 Toast 并退出应用
-                Toast.makeText(this, "连续两次回退即退出MTV!!!", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.toast_back_twice_exit_mtv), Toast.LENGTH_LONG).show()
                 finish()
                 exitProcess(0)
             }else{
@@ -448,7 +453,14 @@ class MainActivity : AppCompatActivity() {
 
     private var imageDownloadListener =
         DownloadListener { url, _, _, mimetype, _ ->
-            GeneralUtils.saveBase64ImageToGallery(this, null, url, mimetype)
+            when{
+                mimetype.lowercase(Locale.getDefault()).contains("image") -> {
+                    GeneralUtils.saveBase64ImageToGallery(this, null, url, mimetype)
+                }
+                mimetype.lowercase(Locale.getDefault()).contains("application") -> {
+                    GeneralUtils.saveBase64ImageToGallery(this, null, url, mimetype)
+                }
+            }
         }
 
 
@@ -469,15 +481,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun promptUserForAction() {
         MessageDialog.build()
-            .setTitle("提示")
-            .setMessage("是否退出应用？")
+            .setTitle(getString(R.string.dialog_title_tip))
+            .setMessage(getString(R.string.dialog_info_exit_app))
             .setCancelable(false)
-            .setOkButton("否") { baseDialog, _ ->
+            .setOkButton(getString(R.string.dialog_button_cancel)) { baseDialog, _ ->
                 baseDialog.dismiss()
                 resetBackButtonClickFlagAfterDelay()
                 false
             }
-            .setCancelButton("是") { baseDialog, _ ->
+            .setCancelButton(getString(R.string.dialog_button_ok)) { baseDialog, _ ->
                 baseDialog.dismiss()
                 exitProcess(0)
                 false

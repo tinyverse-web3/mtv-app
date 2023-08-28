@@ -68,7 +68,7 @@ object BiometricPromptUtils {
         }.build()
 
     fun callbackJs(activity: AppCompatActivity, requestCode: String, code: Int, result: String){
-        var message = "生物识别出错"
+        var message = activity.getString(R.string.prompt_info_bio_verify_error)
         val data: Any = result
         val isDelete = false
         val callback = JsCallMtv.requestCodeMap[requestCode]

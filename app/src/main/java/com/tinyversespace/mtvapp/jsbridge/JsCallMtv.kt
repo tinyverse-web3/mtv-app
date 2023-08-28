@@ -4,15 +4,25 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
+import android.os.Looper
 import android.webkit.JavascriptInterface
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import com.core.web.Callback
+import com.core.web.CallbackBean
 import com.core.web.JsCallback
+import com.tinyversespace.mtvapp.R
 import com.tinyversespace.mtvapp.activities.BiometricLoginActivity
 import com.tinyversespace.mtvapp.activities.FingerprintActivity
 import com.tinyversespace.mtvapp.activities.MainActivity
 import com.tinyversespace.mtvapp.activities.QrcodeScanActivity
+import com.tinyversespace.mtvapp.activities.SplashScreenActivity
 import com.tinyversespace.mtvapp.biometric.AppUser
+import com.tinyversespace.mtvapp.utils.GeneralUtils
+import com.tinyversespace.mtvapp.utils.language.LanguageType
+import com.tinyversespace.mtvapp.utils.language.MultiLanguageService
+import kotlin.system.exitProcess
 
 class JsCallMtv(private val context: Context) {
 
@@ -130,6 +140,36 @@ class JsCallMtv(private val context: Context) {
     }
 
     @JavascriptInterface
+    fun setupLanguage(params: String, callback: Callback) {
+        requestCodeMap[REQUEST_CODE_SET_UP_LANGUAGE] = callback
+        if (context is Activity) {
+            val sharedPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+            val editor = sharedPrefs.edit()
+            var selectedLanguage = params.trim()
+            if(selectedLanguage.isNullOrEmpty()){
+                callback.success(CallbackBean(-1, context.getString(R.string.language_switch_failed), "failed"), false)
+                return
+            }
+            editor.putString("language", params.trim()) // 'selectedLanguage' 是用户选择的新语言
+            editor.apply()
+            val handler = Handler(Looper.getMainLooper())
+            //GeneralUtils.showToast(context, context.getString(R.string.toast_language_switched))
+            callback.success(CallbackBean(0,  context.getString(R.string.language_switch_successfully), "success"), false)
+
+            when(selectedLanguage){
+                "en" -> {
+                    MultiLanguageService.changeLanguage(context, LanguageType.LANGUAGE_EN)
+                    restartCurrentActivity(context)
+                }
+                "zh-CN" -> {
+                    MultiLanguageService.changeLanguage(context, LanguageType.LANGUAGE_ZH_CN)
+                    restartCurrentActivity(context)
+                }
+            }
+        }
+    }
+
+    @JavascriptInterface
     fun takePhoto() {
         val mainActivity = context as MainActivity
         if (context is Activity) {
@@ -138,6 +178,14 @@ class JsCallMtv(private val context: Context) {
         }
     }
 
+    // 在当前的 Activity 中执行重启操作
+    private fun restartCurrentActivity(context: Context) {
+        val mainActivity = context as MainActivity
+        mainActivity.finish() // 关闭当前 Activity
+        context.startActivity(mainActivity.intent) // 重新启动当前 Activity
+    }
+
+
 
     companion object {
         const val REQUEST_CODE_FINGER_ACTIVITY: String = "1000"
@@ -145,6 +193,7 @@ class JsCallMtv(private val context: Context) {
         const val REQUEST_CODE_BIOMETRIC_VERIFY: String = "1003"
         const val REQUEST_CODE_SET_UP_BIOMETRIC: String = "1004"
         const val REQUEST_CODE_IS_BIOMETRIC_SET_UP: String = "1005"
+        const val REQUEST_CODE_SET_UP_LANGUAGE: String = "1006"
         val requestCodeMap = HashMap<String, Callback>()
     }
 }

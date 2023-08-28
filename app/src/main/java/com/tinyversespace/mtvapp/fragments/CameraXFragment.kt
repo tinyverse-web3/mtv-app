@@ -425,7 +425,7 @@ abstract class CameraXFragment : Fragment() {
                     // 图像保存失败
                     // 在此处处理保存失败后的操作，例如显示错误提示或通知用户保存失败
                     Log.e(TAG, "Photo capture failed: ${exception.message}")
-                    Toast.makeText(requireContext(), "Failed to capture photo", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), getString(R.string.toast_capture_photo_failed), Toast.LENGTH_SHORT).show()
                 }
             }
         )

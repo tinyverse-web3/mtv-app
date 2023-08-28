@@ -27,6 +27,7 @@ import com.kongzue.dialogx.dialogs.MessageDialog
 import com.tinyversespace.mtvapp.R
 import com.tinyversespace.mtvapp.service.MtvService
 import com.tinyversespace.mtvapp.utils.GeneralUtils
+import com.tinyversespace.mtvapp.utils.language.MultiLanguageService
 import java.io.File
 import java.util.concurrent.CountDownLatch
 import kotlin.system.exitProcess
@@ -51,13 +52,13 @@ class SplashScreenActivity : AppCompatActivity() {
             val serverIsOk = intent.getBooleanExtra("server_is_ok", false)
             if(serverIsOk){
                 val mainIntent = Intent(this@SplashScreenActivity, MainActivity::class.java)
-//                Toast.makeText(context, "Dauth server launch successfully", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(context, getString(R.string.toast_dauth_launch_success), Toast.LENGTH_SHORT).show()
                 startActivity(mainIntent)
                 // 关闭当前活动
                 finish()
             }else{
                 //提示用户进行操作，重启应用还是退出应用
-                Toast.makeText(context, "Dauth server launch failed!!!", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, getString(R.string.toast_dauth_launch_failed), Toast.LENGTH_LONG).show()
                 promptUserForAction()
             }
         }
@@ -99,6 +100,11 @@ class SplashScreenActivity : AppCompatActivity() {
         unregisterReceiver(serverCompletedReceiver)
     }
 
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(MultiLanguageService.changeContextLocale(newBase))
+    }
+
+
     private fun launchMtvServer(){
         //创建MTV服务所需要的存储目录
         mtvRootPath = createFolderIfNotExists().absolutePath
@@ -117,10 +123,10 @@ class SplashScreenActivity : AppCompatActivity() {
         if (!folder.exists()) {
             if (folder.mkdirs()) {
                 // 文件夹创建成功
-                Toast.makeText(this, "MTV server storage folder created successfully", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_mtv_folder_created_ok), Toast.LENGTH_SHORT).show()
             } else {
                 // 文件夹创建失败
-                Toast.makeText(this, "MTV server storage folder created failed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.toast_mtf_folder_created_failed), Toast.LENGTH_SHORT).show()
             }
         }
         return folder
@@ -168,16 +174,16 @@ class SplashScreenActivity : AppCompatActivity() {
                     } else {
                         // 用户未授权 MANAGE_EXTERNAL_STORAGE 权限，弹出提示对话框
                         MessageDialog.build()
-                            .setTitle("权限请求")
-                            .setMessage("需要 MANAGE_EXTERNAL_STORAGE 权限才能正常使用应用，请前往设置授权。")
+                            .setTitle(getString(R.string.per_request_title))
+                            .setMessage(getString(R.string.per_external_storage_request_message))
                             .setCancelable(false)
-                            .setOkButton("去授权") { baseDialog, _ ->
+                            .setOkButton(getString(R.string.per_dialog_button_go_grant)) { baseDialog, _ ->
                                 baseDialog.dismiss()
                                 // 跳转到应用设置页面
                                 authorizeAccessSdcard()
                                 false
                             }
-                            .setCancelButton("退出应用") { baseDialog, _ ->
+                            .setCancelButton(getString(R.string.per_dialog_button_exit_app)) { baseDialog, _ ->
                                 baseDialog.dismiss()
                                 finish()
                                 false
@@ -217,17 +223,17 @@ class SplashScreenActivity : AppCompatActivity() {
                launchMtvServer()
             } else {
                 // 权限被拒绝，无法创建文件夹
-                Toast.makeText(this, "The permission is not approved by the user, and the application may not be available!!!", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.toast_folder_permission_approved_failed), Toast.LENGTH_LONG).show()
             }
         }
     }
 
     private fun promptUserForAction(){
         MessageDialog.build()
-            .setTitle("提示")
-            .setMessage("服务启动失败，是否重启应用？")
+            .setTitle(getString(R.string.dialog_title_tip))
+            .setMessage(getString(R.string.mtv_service_launch_failed_message))
             .setCancelable(true)
-            .setOkButton("重启") { baseDialog, _ ->
+            .setOkButton(getString(R.string.mtv_service_dialog_button_restart)) { baseDialog, _ ->
                 baseDialog.dismiss()
                 // 重启应用
                 // 延迟3秒后重新启动应用
@@ -241,7 +247,7 @@ class SplashScreenActivity : AppCompatActivity() {
                 }, 3000)
                 false
             }
-            .setCancelButton("退出") { baseDialog, _ ->
+            .setCancelButton(getString(R.string.mtv_service_dialog_button_exit)) { baseDialog, _ ->
                 // 关闭对话框
                 baseDialog.dismiss()
                 // 退出应用

@@ -19,7 +19,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             SweepLoadingView:showArrow="false"
-            android:contentDescription="加载中"/>
+            android:contentDescription="@string/dialog_loading"/>
 
         <TextView
             android:id="@+id/tvShow"

@@ -25,6 +25,7 @@ import com.tinyversespace.mtvapp.fragments.CameraXFragment
 import com.tinyversespace.mtvapp.fragments.MinutiaeFragment
 import com.tinyversespace.mtvapp.fragments.PreviewFragment
 import com.tinyversespace.mtvapp.utils.PhotoItem
+import com.tinyversespace.mtvapp.utils.language.MultiLanguageService
 
 
 class FingerprintActivity : AppCompatActivity(), CameraXFragment.OnPhotoTakenListener {
@@ -84,11 +85,11 @@ class FingerprintActivity : AppCompatActivity(), CameraXFragment.OnPhotoTakenLis
         if (requestCode == deleteRequestCode) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // 权限已授予，执行删除操作
-                Toast.makeText(this, "sdcard permission granted予", Toast.LENGTH_SHORT)
+                Toast.makeText(this, getString(R.string.toast_sdcard_permission_ok), Toast.LENGTH_SHORT)
             } else {
                 // 权限被拒绝
                 // 处理权限被拒绝的情况
-                Toast.makeText(this, "The authorization of the sdcard failed, and the write and delete operations cannot be performed", Toast.LENGTH_SHORT)
+                Toast.makeText(this, getString(R.string.toast_sdcard_permission_failed), Toast.LENGTH_SHORT)
             }
         }
     }
@@ -110,6 +111,10 @@ class FingerprintActivity : AppCompatActivity(), CameraXFragment.OnPhotoTakenLis
         showPreviewFragment()
     }
 
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(MultiLanguageService.changeContextLocale(newBase))
+    }
+
 
 
     private fun deletePhotoFromGallery(context: Context, savedUri: Uri) {
@@ -126,7 +131,7 @@ class FingerprintActivity : AppCompatActivity(), CameraXFragment.OnPhotoTakenLis
 
 
         if (deletedCount > 0) {
-            Toast.makeText(context, "Successes to delete photo", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, getString(R.string.toast_del_pic_ok), Toast.LENGTH_SHORT).show()
             return
         }
         if (delFile.exists()) {
@@ -139,11 +144,11 @@ class FingerprintActivity : AppCompatActivity(), CameraXFragment.OnPhotoTakenLis
                     null,
                     null
                 )
-                Toast.makeText(context, "Successes to delete photo", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.toast_del_pic_ok), Toast.LENGTH_SHORT).show()
                 return
             }
         }
-        Toast.makeText(context, "Failed to delete photo", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, getString(R.string.toast_del_pic_failed), Toast.LENGTH_SHORT).show()
     }
 
 

@@ -21,7 +21,7 @@
         android:layout_below="@id/previewView"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
-        android:text="拍照第 1 张指纹照片" />
+        android:text="@string/take_fingerprint_pic_prompt" />
 
     <ImageView
         android:id="@+id/imageView"

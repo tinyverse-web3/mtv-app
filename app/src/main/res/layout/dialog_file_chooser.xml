@@ -10,13 +10,13 @@
         android:id="@+id/btn_camera"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="拍照" />
+        android:text="@string/button_take_pic"/>
 
     <Button
         android:id="@+id/btn_gallery"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="相册" />
+        android:text="@string/button_album" />
 
 </LinearLayout>

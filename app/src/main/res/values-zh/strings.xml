@@ -1,0 +1,100 @@
+<resources>
+    <string name="app_name">MTVApp</string>
+    <string name="app_full_name">My TinyVerse Space</string>
+    <string name="action_settings">Settings</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <!-- Strings used for fragments for navigation -->
+    <string name="button_take_picture">TAKE PICTURE</string>
+
+    <string name="permission_camera_title">Camera</string>
+    <string name="permission_camera_rationale">Access to the camera is needed for detection</string>
+    <string name="no_camera_permission">This application cannot run because it does not have the camera permission.  The application will now exit.</string>
+    <string name="camera_error">This device doesn\'t support Camera2 API.</string>
+    <string name="button_go_back">Go Back</string>
+    <string name="button_go_settings">Go to Settings</string>
+
+    <string name="enable_autofocus">Autofocus On</string>
+    <string name="disable_autofocus">Autofocus Off</string>
+    <string name="button_take_pic">拍照</string>
+    <string name="button_select_pic">选择图片</string>
+    <string name="button_album">相册</string>
+
+    <!-- for fingerprint -->
+    <string name="take_fingerprint_pic_prompt">拍照第 1 张指纹照片</string>
+
+
+
+
+    <!-- for biometric   -->
+    <string name="prompt_info_title">MTV Authentication</string>
+    <string name="prompt_info_subtitle">Please login to get access</string>
+    <string name="prompt_info_description">MTV is using Android biometric authentication</string>
+    <string name="prompt_info_use_app_password">Use app password</string>
+    <string name="prompt_info_bio_set_ok">生物识别设置成功</string>
+    <string name="toast_no_bio_registered">用户无法进行身份验证，因为没有注册生物识别或设备凭据</string>
+    <string name="prompt_info_bio_verify_ok">生物识别认证成功</string>
+    <string name="prompt_info_bio_verify_error">生物识别出错</string>
+    <string name="prompt_info_bio_not_configured">生物识别未配置</string>
+    <string name="prompt_info_bio_unlock_to_configured">请解锁后在设置页面进行配置</string>
+    <string name="prompt_info_app_bio_not_configured">请解锁后在设置页面进行配置</string>
+    <string name="credentials_have_changed">设备生物识别凭据已经改变</string>
+    <string name="prompt_info_bio_unlock_to_reconfigured">请解锁应用后在设置页面重新进行配置</string>
+    <string name="prompt_info_app_bio_reconfigure">生物识别需要重新配置</string>
+    <string name="prompt_info_bio_have_configured">生物识别已配置</string>
+
+
+    <!--for dialog-->
+    <string name="dialog_loading">加载中</string>
+    <string name="dialog_load">加载</string>
+    <string name="dialog_title_tip">提示</string>
+    <string name="dialog_info_exit_app">是否退出应用？</string>
+    <string name="dialog_button_ok">是</string>
+    <string name="dialog_button_cancel">否</string>
+    <string name="dialog_button_confirm">确定</string>
+    <string name="mtv_service_dialog_button_restart">重启</string>
+    <string name="mtv_service_dialog_button_exit">退出</string>
+    <string name="dialog_animation_load_failed">动画dialog初始化失败</string>
+
+
+    <!-- for qrcode scan -->
+    <string name="qrcode_button_scan">扫一扫</string>
+    <string name="qrcode_scan_prompt_info_ok">成功</string>
+    <string name="qrcode_scan_content_not_scanned">未扫描到内容</string>
+
+
+    <!-- for permission -->
+    <string name="per_request_title">权限请求</string>
+    <string name="per_external_storage_request_message">需要 MANAGE_EXTERNAL_STORAGE 权限才能正常使用应用，请前往设置授权。</string>
+    <string name="per_dialog_button_go_grant">去授权</string>
+    <string name="per_dialog_button_exit_app">退出应用</string>
+
+    <!-- for mtv service launch -->
+    <string name="mtv_service_launch_failed_message">服务启动失败，是否重启应用？</string>
+
+
+    <!-- for toast-->
+    <string name="toast_pic_have_saved">图片已经保存到相册中</string>
+    <string name="toast_pic_failed_save_pic">图片保存失败：</string>
+    <string name="toast_language_switched">已经切换新语言</string>
+    <string name="language_switch_successfully">语言切换成功</string>
+    <string name="language_switch_failed">语言切换成功</string>
+    <string name="toast_back_twice_exit_mtv">连续两次点击回退按钮即退出MTV</string>
+    <string name="toast_dauth_launch_success">Dauth后台服务启动成功</string>
+    <string name="toast_dauth_launch_failed">Dauth后台服务启动失败</string>
+    <string name="toast_sdcard_permission_ok">sdcard读写授权成功</string>
+    <string name="toast_sdcard_permission_failed">sdcard授权失败，无法进行写入、删除操作</string>
+    <string name="toast_mtv_folder_created_ok">MTV服务存储目录创建成功</string>
+    <string name="toast_mtf_folder_created_failed">MTV服务存储目录创建失败</string>
+    <string name="toast_del_pic_ok">成功删除照片</string>
+    <string name="toast_del_pic_failed">删除照片失败</string>
+    <string name="toast_folder_permission_approved_failed">权限未经过用户批准，应用可能无法使用！！！</string>
+    <string name="toast_permission_denied">授权被拒绝</string>
+    <string name="toast_capture_photo_failed">拍照失败</string>
+
+
+</resources>
