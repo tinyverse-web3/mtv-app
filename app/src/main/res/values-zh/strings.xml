@@ -1,25 +1,25 @@
 <resources>
-    <string name="app_name">MTVApp</string>
+    <string name="app_name">TVS</string>
     <string name="app_full_name">My TinyVerse Space</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">配置</string>
     <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
+    <string name="first_fragment_label">第一个片段</string>
+    <string name="second_fragment_label">第二个片段</string>
+    <string name="next">下一个</string>
+    <string name="previous">上一个</string>
 
     <!-- Strings used for fragments for navigation -->
-    <string name="button_take_picture">TAKE PICTURE</string>
+    <string name="button_take_picture">拍照</string>
 
-    <string name="permission_camera_title">Camera</string>
+    <string name="permission_camera_title">相机</string>
     <string name="permission_camera_rationale">Access to the camera is needed for detection</string>
     <string name="no_camera_permission">This application cannot run because it does not have the camera permission.  The application will now exit.</string>
-    <string name="camera_error">This device doesn\'t support Camera2 API.</string>
-    <string name="button_go_back">Go Back</string>
-    <string name="button_go_settings">Go to Settings</string>
+    <string name="camera_error">该设备不支持Camera2 API.</string>
+    <string name="button_go_back">回退</string>
+    <string name="button_go_settings">跳到配置页</string>
 
-    <string name="enable_autofocus">Autofocus On</string>
-    <string name="disable_autofocus">Autofocus Off</string>
+    <string name="enable_autofocus">自动对焦 打开</string>
+    <string name="disable_autofocus">自动对焦 关闭</string>
     <string name="button_take_pic">拍照</string>
     <string name="button_select_pic">选择图片</string>
     <string name="button_album">相册</string>
@@ -31,10 +31,10 @@
 
 
     <!-- for biometric   -->
-    <string name="prompt_info_title">MTV Authentication</string>
+    <string name="prompt_info_title">TinyVerse Space</string>
     <string name="prompt_info_subtitle">Please login to get access</string>
-    <string name="prompt_info_description">MTV is using Android biometric authentication</string>
-    <string name="prompt_info_use_app_password">Use app password</string>
+    <string name="prompt_info_description">正在使用Android生物识别系统</string>
+    <string name="prompt_info_use_app_password">使用密码</string>
     <string name="prompt_info_bio_set_ok">生物识别设置成功</string>
     <string name="toast_no_bio_registered">用户无法进行身份验证，因为没有注册生物识别或设备凭据</string>
     <string name="prompt_info_bio_verify_ok">生物识别认证成功</string>
@@ -83,16 +83,16 @@
     <string name="toast_language_switched">已经切换新语言</string>
     <string name="language_switch_successfully">语言切换成功</string>
     <string name="language_switch_failed">语言切换成功</string>
-    <string name="toast_back_twice_exit_mtv">连续两次点击回退按钮即退出MTV</string>
+    <string name="toast_back_twice_exit_mtv">连续两次点击回退按钮即退出应用</string>
     <string name="toast_dauth_launch_success">Dauth后台服务启动成功</string>
     <string name="toast_dauth_launch_failed">Dauth后台服务启动失败</string>
     <string name="toast_sdcard_permission_ok">sdcard读写授权成功</string>
     <string name="toast_sdcard_permission_failed">sdcard授权失败，无法进行写入、删除操作</string>
-    <string name="toast_mtv_folder_created_ok">MTV服务存储目录创建成功</string>
-    <string name="toast_mtf_folder_created_failed">MTV服务存储目录创建失败</string>
+    <string name="toast_mtv_folder_created_ok">服务存储目录创建成功</string>
+    <string name="toast_mtf_folder_created_failed">服务存储目录创建失败</string>
     <string name="toast_del_pic_ok">成功删除照片</string>
     <string name="toast_del_pic_failed">删除照片失败</string>
-    <string name="toast_folder_permission_approved_failed">权限未经过用户批准，应用可能无法使用！！！</string>
+    <string name="toast_folder_permission_approved_failed">权限未经过用户批准，应用可能无法使用！</string>
     <string name="toast_permission_denied">授权被拒绝</string>
     <string name="toast_capture_photo_failed">拍照失败</string>
 
