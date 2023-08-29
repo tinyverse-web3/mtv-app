@@ -15,7 +15,6 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import android.util.Log
 import android.view.animation.AccelerateInterpolator
 import android.widget.ImageView
 import android.widget.Toast
@@ -28,20 +27,10 @@ import com.kongzue.dialogx.dialogs.MessageDialog
 import com.tinyversespace.mtvapp.R
 import com.tinyversespace.mtvapp.service.MtvService
 import com.tinyversespace.mtvapp.service.SocketConnect
+import com.tinyversespace.mtvapp.service.VersionInfoService
 import com.tinyversespace.mtvapp.utils.GeneralUtils
 import com.tinyversespace.mtvapp.utils.language.MultiLanguageService
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
-import okhttp3.ResponseBody
 import java.io.File
-import java.util.concurrent.CountDownLatch
 import kotlin.system.exitProcess
 
 
@@ -55,29 +44,33 @@ class SplashScreenActivity : AppCompatActivity() {
         var mtvRootPath = ""
         val permissions = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
         lateinit var requestPermissionLauncher : ActivityResultLauncher<Intent>
-        private lateinit var latch: CountDownLatch
-        private var isNeedClearWebCache : Boolean = false
         private const val TAG = "SplashScreenActivity"
+        private const val getVersionUrl = "https://dev.tinyverse.space/version.txt"
     }
 
-    private val serverCompletedReceiver = object : BroadcastReceiver() {
+    private val expectedBroadcastCount = 2
+    private val broadcastData = HashMap<String, Boolean>()
+
+
+    private val mtvServerReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             // 接收到任务完成的广播，启动 MainActivity
             val serverIsOk = intent.getBooleanExtra("server_is_ok", false)
-            if(serverIsOk){
-                val mainIntent = Intent(this@SplashScreenActivity, MainActivity::class.java)
-                mainIntent.putExtra("is_need_clear_cache",  isNeedClearWebCache)
-                //Toast.makeText(context, getString(R.string.toast_dauth_launch_success), Toast.LENGTH_SHORT).show()
-                startActivity(mainIntent)
-                // 关闭当前活动
-                finish()
-            }else{
-                //提示用户进行操作，重启应用还是退出应用
-                Toast.makeText(context, getString(R.string.toast_dauth_launch_failed), Toast.LENGTH_LONG).show()
-                promptUserForAction()
-            }
+            // 处理第一个服务的广播
+            broadcastData["server_is_ok"] = serverIsOk
+            checkBroadcastResult(broadcastData)
         }
     }
+    private val versionServerReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            // 接收到任务完成的广播，启动 MainActivity
+            val isNeedClearCache = intent.getBooleanExtra("is_need_clear_cache", true)
+            // 处理第一个服务的广播
+            broadcastData["is_need_clear_cache"] = isNeedClearCache
+            checkBroadcastResult(broadcastData)
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,26 +88,26 @@ class SplashScreenActivity : AppCompatActivity() {
             //}
 
             //数据只保存在/sdcard/Android/com.tinyversespace.mtvapp/目录中 注意：删除App，用户数据也会被删除
-            isNeedClearCache()
             launchMtvServer()
             launchSocketServer()
+            launchVersionServer(getVersionUrl)
         }
         // 注册广播接收器
         //通过serverCompletedReceiver广播器来接收服务是否启动OK
-        val filter = IntentFilter("$packageName.MTV_SERVER_LAUNCH")
-        registerReceiver(serverCompletedReceiver, filter)
+        val mtvFilter = IntentFilter("$packageName.MTV_SERVER_LAUNCH")
+        registerReceiver(mtvServerReceiver, mtvFilter)
+        val versionFilter = IntentFilter("$packageName.CLEAR_CACHE")
+        registerReceiver(versionServerReceiver, versionFilter)
 
         //初始化全局DilogX
         GeneralUtils.dialogInit(this.applicationContext)
     }
 
-
-
     override fun onDestroy() {
         super.onDestroy()
-
         // 在活动销毁时注销广播接收器
-        unregisterReceiver(serverCompletedReceiver)
+        unregisterReceiver(mtvServerReceiver)
+        unregisterReceiver(versionServerReceiver)
     }
 
     override fun attachBaseContext(newBase: Context) {
@@ -132,10 +125,37 @@ class SplashScreenActivity : AppCompatActivity() {
         startService(serviceIntent)
     }
 
+    private fun checkBroadcastResult(dataMap: HashMap<String, Boolean>) {
+        if (dataMap.size == 2) {//两个服务都完成了，执行下一步任务
+            // 接收到任务完成的广播，启动 MainActivity
+            val serverIsOk = dataMap["server_is_ok"]
+            if(serverIsOk!!){
+                val mainIntent = Intent(this@SplashScreenActivity, MainActivity::class.java)
+                mainIntent.putExtra("is_need_clear_cache",  dataMap["is_need_clear_cache"])
+                //Toast.makeText(context, getString(R.string.toast_dauth_launch_success), Toast.LENGTH_SHORT).show()
+                startActivity(mainIntent)
+                // 关闭当前活动
+                finish()
+            }else{
+                //提示用户进行操作，重启应用还是退出应用
+                Toast.makeText(this, getString(R.string.toast_dauth_launch_failed), Toast.LENGTH_LONG).show()
+                promptUserForAction()
+            }
+        }
+    }
+
     private fun launchSocketServer(){
         // 启动后台服务
         val socketServiceIntent = Intent(this@SplashScreenActivity, SocketConnect::class.java)
         startService(socketServiceIntent)
+    }
+
+    private fun launchVersionServer(versionUrl: String){
+        // 启动后台服务
+        val versionServiceIntent = Intent(this@SplashScreenActivity, VersionInfoService::class.java).apply {
+            putExtra("tvs_version_url", versionUrl)
+        }
+        startService(versionServiceIntent)
     }
 
     private fun createFolderIfNotExists() : File{
@@ -302,55 +322,4 @@ class SplashScreenActivity : AppCompatActivity() {
         // 启动动画
         scaleAnimator.start()
     }
-
-    private suspend fun getVersionFileContent(url: String): String {
-        val client = OkHttpClient()
-        val request = Request.Builder()
-            .url(url)
-            .build()
-
-        try {
-            val response: Response = client.newCall(request).execute()
-            val responseBody: ResponseBody? = response.body()
-
-            if (responseBody != null) {
-                val versionContent = responseBody.string()
-                responseBody.close() // 关闭资源
-                return versionContent
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return ""
-        }
-        return ""
-    }
-
-    private fun isNeedClearCache() {
-        var versionUrl = "https://dev.tinyverse.space/version.txt"
-       GlobalScope.launch(Dispatchers.IO){
-            val tvsVersionOnLineStr = getVersionFileContent(versionUrl)
-            // 等待网络请求返回
-            var tvsVersionOnLine = 0;
-            if(tvsVersionOnLineStr.isNullOrEmpty()){
-                tvsVersionOnLine = 0;
-            }else{
-                tvsVersionOnLine = tvsVersionOnLineStr.toInt()
-            }
-           Log.i(TAG, "current web page version: $tvsVersionOnLineStr")
-
-            val sharedPrefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-            var tvsVersionSP = sharedPrefs.getInt("version", 0)
-
-            if(tvsVersionOnLine > tvsVersionSP){
-                val editor = sharedPrefs.edit()
-                editor.putInt("version", tvsVersionOnLine)
-                editor.apply()
-                isNeedClearWebCache = true
-            }else {
-                isNeedClearWebCache = false
-            }
-        }
-
-    }
-
 }
