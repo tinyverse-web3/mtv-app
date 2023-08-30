@@ -292,17 +292,7 @@ class MainActivity : AppCompatActivity() {
                     (view as? BaseWebView)?.let { inject(it, url) }
                 }
             }
-            
-            @SuppressLint("WebViewClientOnReceivedSslError")
-            override fun onReceivedSslError(
-                view: WebView?,
-                handler: SslErrorHandler,
-                error: SslError?
-            ) {
-                Log.d(TAG, "onReceivedSslError!")
-                handler.proceed() // Ignore SSL certificate errors
-                super.onReceivedSslError(view, handler, error)
-            }
+
         }
 
         //添加进度条
