@@ -36,7 +36,6 @@
             android:label="@string/app_full_name"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:hardwareAccelerated="false"
             >
         </activity>
         <activity android:name=".activities.FingerprintActivity" />
