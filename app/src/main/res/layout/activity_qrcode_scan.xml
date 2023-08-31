@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.tinyversespace.mtvapp.views.QrcodeScanView
+    <com.tinyverse.tvs.views.QrcodeScanView
         android:id="@+id/qrcode_scan_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

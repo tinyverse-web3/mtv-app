@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace 'com.tinyversespace.mtvapp'
+    namespace 'com.tinyverse.tvs'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.tinyversespace.mtvapp"
+        applicationId "com.tinyverse.tvs"
         minSdk 26
         targetSdk 33
         versionCode 1

@@ -14,7 +14,7 @@
         android:layout_centerHorizontal="true"
         android:background="@drawable/loadview_circle_corners"
         >
-        <com.tinyversespace.mtvapp.views.progress.WebViewCircleProgress
+        <com.tinyverse.tvs.views.progress.WebViewCircleProgress
             android:id="@+id/progress_bar"
             android:layout_width="40dp"
             android:layout_height="40dp"

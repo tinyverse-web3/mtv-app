@@ -18,5 +18,5 @@ dependencyResolutionManagement {
         jcenter()
     }
 }
-rootProject.name = "MTVApp"
+rootProject.name = "TVSApp"
 include ':app'
