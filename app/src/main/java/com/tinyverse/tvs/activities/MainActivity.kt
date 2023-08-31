@@ -301,7 +301,7 @@ class MainActivity : AppCompatActivity() {
                 if(isFirstLoad){ //第一次加载时显示进度条
                     if (newProgress == 100) {
                         LoadView.stopLoading()
-                        isFirstLoad = false
+                        isFirstLoad = false //第一次加载完成
                     } else {
                         LoadView.showLoading(view.context, newProgress.toString() + "")
                         if (newProgress == 100) {

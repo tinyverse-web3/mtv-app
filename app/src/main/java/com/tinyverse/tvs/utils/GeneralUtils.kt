@@ -74,9 +74,8 @@ object GeneralUtils {
         request.addRequestHeader("User-Agent", userAgent)
         request.setDescription("Downloading file...")
         request.setTitle(URLUtil.guessFileName(url, contentDisposition, mimeType))
-        request.allowScanningByMediaScanner()
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, addTimestampSuffixToFileName(URLUtil.guessFileName(url, contentDisposition, mimeType)))
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, URLUtil.guessFileName(url, contentDisposition, mimeType))
 
         val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         val downloadId = downloadManager.enqueue(request)
