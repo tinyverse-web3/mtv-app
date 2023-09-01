@@ -134,16 +134,15 @@ dependencies {
     implementation "com.kongzue.dialogx:DialogX:${dialogX_version}"
     implementation "com.kongzue.dialogx.style:DialogXMaterialYouStyle:${dialogX_version}"
 
+    //CrashHandler
+    implementation 'com.github.emirhankolver:GlobalExceptionHandler:1.0.1'
+
 }
 
-//定义时间
-def releaseTime() {
-    return new Date().format("yyyyMMdd", TimeZone.getTimeZone("UTC"))
-}
 
 //设置发布时的版本号
-def getVersionName(){
-    return "1.0-alpha"
+static def getVersionName(){
+    return "1.0.0"
 }
 
 
