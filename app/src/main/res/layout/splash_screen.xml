@@ -21,6 +21,6 @@
         android:text="@string/app_full_name"
         android:textColor="@android:color/black"
         android:textSize="30sp"
-        android:fontFamily="@font/alimama_dongfangdakai_regular" />
+        android:fontFamily="@font/roboto_medium" />
 
 </RelativeLayout>

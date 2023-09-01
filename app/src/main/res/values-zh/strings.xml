@@ -97,6 +97,8 @@
     <string name="toast_capture_photo_failed">拍照失败</string>
     <string name="toast_download_file_ok">下载成功</string>
     <string name="toast_download_file_failed">下载失败</string>
+    <string name="toast_message">消息</string>
+    <string name="toast_unknown_exception">很抱歉出现了未知异常，应用即将重启</string>
 
 
 </resources>

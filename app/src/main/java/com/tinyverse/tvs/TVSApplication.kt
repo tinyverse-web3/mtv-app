@@ -2,6 +2,8 @@ package com.tinyverse.tvs
 
 import android.app.Application
 import android.content.Context
+import com.emirhankolver.GlobalExceptionHandler
+import com.tinyverse.tvs.activities.CrashActivity
 import com.tinyverse.tvs.utils.language.LanguageType
 import com.tinyverse.tvs.utils.language.MultiLanguageService
 
@@ -14,6 +16,7 @@ class TVSApplication  : Application() {
         // 例如：初始化某些库、设置默认语言、配置全局变量等
         MultiLanguageService.init(this)
         applyLanguageSetting()
+        GlobalExceptionHandler.initialize(this, CrashActivity::class.java)
     }
 
     private fun applyLanguageSetting() {

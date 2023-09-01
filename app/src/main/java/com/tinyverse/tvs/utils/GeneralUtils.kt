@@ -1,5 +1,6 @@
 package com.tinyverse.tvs.utils
 
+import android.annotation.SuppressLint
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
 import android.content.ContentResolver
@@ -83,6 +84,7 @@ object GeneralUtils {
         // 注册下载完成广播接收器
         val onComplete = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
         val receiver = object : BroadcastReceiver() {
+            @SuppressLint("Range")
             override fun onReceive(context: Context?, intent: Intent?) {
                 val receivedId = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
                 if (receivedId == downloadId) {

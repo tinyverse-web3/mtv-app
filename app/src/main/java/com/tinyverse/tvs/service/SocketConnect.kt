@@ -8,6 +8,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.widget.Toast
 import com.google.gson.Gson
+import com.tinyverse.tvs.R
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -56,7 +57,7 @@ class SocketConnect: Service(){
     @OptIn(DelicateCoroutinesApi::class)
     @Throws(IOException::class)
     fun startConnectServer(context:Context) {
-        val port = 8080
+        val port = 9666
         val serverSocket = ServerSocket(port)
         println("Server listening on port $port")
         GlobalScope.launch(Dispatchers.IO) {
@@ -101,7 +102,8 @@ class SocketConnect: Service(){
                     }else if (message.masterKey != "") {
                         username = message.masterKey
                     }
-                    var msg = formattedDateTime + " Receive a message form " + username + ": " + message.content
+                    //var msg = formattedDateTime + " Receive a message form " + username + ": " + message.content
+                    var msg = context.getString(R.string.toast_message) + "(" + formattedDateTime + ")-> " +  username + ": " + message.content
 
                     // 处理客户端请求
                     val response = "ok"
@@ -111,7 +113,7 @@ class SocketConnect: Service(){
                     println("Connect:Response ok completed")
 
                     mainHandler.post {
-                        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
                     }
                     //}
 

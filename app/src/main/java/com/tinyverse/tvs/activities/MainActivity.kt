@@ -179,7 +179,6 @@ class MainActivity : AppCompatActivity() {
 
         //主页面url特征字符串：表示回到主页面
         homeFeatureString = arrayOf("/home/space", "/unlock", "/index")
-
     }
 
     override fun attachBaseContext(newBase: Context) {
