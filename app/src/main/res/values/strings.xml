@@ -98,7 +98,12 @@
     <string name="toast_download_file_ok">Download successful</string>
     <string name="toast_download_file_failed">Download Failed</string>
     <string name="toast_message">Message</string>
-    <string name="toast_unknown_exception">Sorry, an unknown exception occurred, the application will be restarted soon</string>
+    <string name="crash_unknown_exception">Unexpected Error Occurred</string>
+    <string name="crash_unknown_exception_prompt">Sorry for inconvenience. Please report this error to us</string>
+    <string name="crash_restart_button">Restart</string>
+    <string name="crash_log_file_prompt">Report Us: </string>
+    <string name="jscall_access_link_url_error">The url parameter is wrong or does not exist</string>
+    <string name="jscall_access_link_url_ok">System browser successfully called</string>
 
 
 </resources>

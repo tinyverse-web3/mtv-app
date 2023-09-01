@@ -3,6 +3,7 @@ package com.tinyverse.tvs.jsbridge
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Handler
 import android.webkit.JavascriptInterface
 import android.widget.Toast
@@ -16,6 +17,7 @@ import com.tinyverse.tvs.activities.QrcodeScanActivity
 import com.tinyverse.tvs.biometric.AppUser
 import com.tinyverse.tvs.utils.language.LanguageType
 import com.tinyverse.tvs.utils.language.MultiLanguageService
+import java.lang.Exception
 
 class JsCallMtv(private val context: Context) {
 
@@ -170,6 +172,32 @@ class JsCallMtv(private val context: Context) {
             mainActivity.takePhoto()
         }
     }
+
+    //访问外部链接
+    @JavascriptInterface
+    fun accessLink(params: String, callback: Callback) {
+        if (context is Activity) {
+            // 定义要访问的外部链接
+            val params = "https://www.baidu.com" // 替换为您要访问的链接
+
+            if(params.isNullOrEmpty()){
+                callback.success(CallbackBean(-1, context.getString(R.string.jscall_access_link_url_error), "failed"), false)
+                return
+            }
+            var url = params.trim()
+            val intent = Intent(Intent.ACTION_VIEW)
+            try{
+                val uri = Uri.parse(url)
+                intent.data = uri
+                context.startActivity(intent)
+                callback.success(CallbackBean(0, context.getString(R.string.jscall_access_link_url_ok), "success"), false)
+            }catch (e : Exception){
+                e.printStackTrace()
+                callback.success(CallbackBean(-2, context.getString(R.string.jscall_access_link_url_error), "failed"), false)
+            }
+        }
+    }
+
 
     // 在当前的 Activity 中执行重启操作
     private fun restartCurrentActivity(context: Context) {

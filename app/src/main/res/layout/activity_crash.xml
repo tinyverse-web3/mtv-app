@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:fontFamily="@font/roboto_bold"
-        android:text="Unexpected Error Occurred"
+        android:text="@string/crash_unknown_exception"
         android:textColor="#000"
         android:textSize="22sp" />
 
@@ -35,7 +35,7 @@
         android:fontFamily="@font/roboto_regular"
         android:gravity="center"
         android:maxEms="11"
-        android:text="Sorry for inconvenience. Please report this error to us"
+        android:text="@string/crash_unknown_exception_prompt"
         android:textColor="#000"
         android:textSize="16sp" />
 
@@ -47,7 +47,7 @@
         android:fontFamily="@font/roboto_bold"
         android:minHeight="50dp"
         android:paddingHorizontal="24dp"
-        android:text="Restart"
+        android:text="@string/crash_restart_button"
         android:textAllCaps="false"
         android:textSize="22sp" />
 
@@ -56,7 +56,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="@font/roboto_regular"
         android:gravity="center"
-        android:text="Report us:"
+        android:text="@string/crash_log_file_prompt"
         android:textColor="#000"
         android:textSize="16sp" />
 

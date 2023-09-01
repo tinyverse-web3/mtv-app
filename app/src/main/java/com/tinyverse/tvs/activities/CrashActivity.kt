@@ -1,13 +1,16 @@
 package com.tinyverse.tvs.activities
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.emirhankolver.GlobalExceptionHandler
+import com.tinyverse.tvs.R
 import com.tinyverse.tvs.databinding.ActivityCrashBinding
+import com.tinyverse.tvs.utils.language.MultiLanguageService
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
@@ -32,13 +35,17 @@ class CrashActivity : AppCompatActivity() {
                 val logFile = saveErrorLogToFile(it)
                 //显示日志文件路径：
                 if(logFile != null){
-                    binding.bLog.text = "Report us log: " + logFile.absolutePath
+                    binding.bLog.text = this.getString(R.string.crash_log_file_prompt) + logFile.absolutePath
                 }
 
             }
         }
         setOnClickListeners()
         setContentView(binding.root)
+    }
+
+    override fun attachBaseContext(newBase: Context) { //切换语言
+        super.attachBaseContext(MultiLanguageService.changeContextLocale(newBase))
     }
 
     private fun setOnClickListeners() {
@@ -53,51 +60,6 @@ class CrashActivity : AppCompatActivity() {
         }
     }
 
-    private fun uncaughtException(exception: Throwable) {
-        val logPath: String
-        if (Environment.getExternalStorageState() ==
-            Environment.MEDIA_MOUNTED
-        ) {
-            logPath = (Environment.getExternalStorageDirectory()
-                .absolutePath
-                    + File.separator
-                    + File.separator
-                    + "log")
-            val file = File(logPath)
-            if (!file.exists()) {
-                file.mkdirs()
-            }
-            try {
-                val fw = FileWriter(
-                    logPath + File.separator
-                            + "tvs_errorlog.log", true
-                )
-                fw.write(Date().toString() + "\n")
-                // 错误信息
-                // 这里还可以加上当前的系统版本，机型型号 等等信息
-                val stackTrace = exception.stackTrace
-                fw.write(exception.message + "\n")
-                for (i in stackTrace.indices) {
-                    fw.write(
-                        ("file:" + stackTrace[i].fileName + " class:"
-                                + stackTrace[i].className + " method:"
-                                + stackTrace[i].methodName + " line:"
-                                + stackTrace[i].lineNumber + "\n")
-                    )
-                }
-                fw.write("\n")
-                fw.close()
-                //显示日志文件路径：
-                binding.bLog.text = "Error Log: $logPath"
-                // 上传错误信息到服务器
-                // uploadToServer();
-            } catch (e: IOException) {
-                Log.e("crash handler", "load file failed...", e.cause)
-            }
-        }
-        exception.printStackTrace()
-    }
-
     private fun saveErrorLogToFile(exception: Throwable): File? {
         val fileName = "tvs_error.log"
         val errorLog = collectErrorLog(exception)
@@ -105,7 +67,7 @@ class CrashActivity : AppCompatActivity() {
         val logFile = File(downloadsDir, fileName)
         try {
             FileWriter(logFile, true).use { writer ->
-                writer.appendLine("-------------------------------") // 添加分隔符
+                writer.appendLine("-------------------------------------------------") // 添加分隔符
                 writer.appendLine(errorLog)
             }
             return logFile

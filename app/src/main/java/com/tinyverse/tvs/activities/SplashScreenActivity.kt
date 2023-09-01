@@ -302,7 +302,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
     private fun startLogoAnimator(logoImageView: ImageView){
         // 创建 ValueAnimator 实现缩放动画
-        val scaleAnimator = ValueAnimator.ofFloat(0.5f, 1.0f)
+        val scaleAnimator = ValueAnimator.ofFloat(0.4f, 0.6f)
         scaleAnimator.duration = 2000L
         scaleAnimator.interpolator = AccelerateInterpolator()
 

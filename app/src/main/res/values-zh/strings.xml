@@ -98,7 +98,12 @@
     <string name="toast_download_file_ok">下载成功</string>
     <string name="toast_download_file_failed">下载失败</string>
     <string name="toast_message">消息</string>
-    <string name="toast_unknown_exception">很抱歉出现了未知异常，应用即将重启</string>
+    <string name="crash_unknown_exception">发生意外错误</string>
+    <string name="crash_unknown_exception_prompt">对此造成的不便表示歉意。 请向我们报告此错误</string>
+    <string name="crash_restart_button">重启</string>
+    <string name="crash_log_file_prompt">报告我们：</string>
+    <string name="jscall_access_link_url_error">url参数错误或者不存在</string>
+    <string name="jscall_access_link_url_ok">成功调用系统浏览器</string>
 
 
 </resources>
