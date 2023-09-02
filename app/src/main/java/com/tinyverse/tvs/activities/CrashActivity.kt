@@ -11,9 +11,11 @@ import com.emirhankolver.GlobalExceptionHandler
 import com.tinyverse.tvs.R
 import com.tinyverse.tvs.databinding.ActivityCrashBinding
 import com.tinyverse.tvs.utils.language.MultiLanguageService
+import java.io.BufferedReader
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
+import java.io.InputStreamReader
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -62,12 +64,15 @@ class CrashActivity : AppCompatActivity() {
 
     private fun saveErrorLogToFile(exception: Throwable): File? {
         val fileName = "tvs_error.log"
+        backupLog(fileName)
         val errorLog = collectErrorLog(exception)
+        var logcatLog = collectLogcatLog()
         val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
         val logFile = File(downloadsDir, fileName)
         try {
             FileWriter(logFile, true).use { writer ->
                 writer.appendLine("-------------------------------------------------") // 添加分隔符
+                writer.appendLine(logcatLog)
                 writer.appendLine(errorLog)
             }
             return logFile
@@ -86,6 +91,47 @@ class CrashActivity : AppCompatActivity() {
             stackTrace.append("    at ${element.className}.${element.methodName}(${element.fileName}:${element.lineNumber})\n")
         }
         return stackTrace.toString()
+    }
+
+    private fun collectLogcatLog():String{
+        val maxLines = 200 // 要获取的日志行数
+        val command = "logcat -d -t $maxLines | grep $packageName"
+        val process = Runtime.getRuntime().exec(command)
+        val reader = BufferedReader(InputStreamReader(process.inputStream))
+        val logcatOutput = StringBuilder()
+        var line: String?
+
+        while (reader.readLine().also { line = it } != null) {
+            logcatOutput.appendLine(line)
+        }
+        return logcatOutput.toString()
+    }
+
+    private fun backupLog(logFileName: String){
+        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        val logFile = File(downloadsDir, logFileName)
+        if(!logFile.exists()){
+            return
+        }
+        val fileSizeInBytes: Long = logFile.length()
+        val fileSizeInMB: Long = (fileSizeInBytes / (1024 * 1024)).toLong() // 将字节转换为MB
+        // 如果日志文件大小超过10MB，执行备份和删除操作
+        if (fileSizeInBytes > 10) {
+            // 获取当前日期作为备份文件名
+            val sdf = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+            val currentDateAndTime = sdf.format(Date())
+
+            // 构建备份文件名
+            val backupFileName = "tvs_error_$currentDateAndTime.log"
+
+            // 备份日志文件
+            val backupFile = File(logFile.parent, backupFileName)
+            logFile.renameTo(backupFile)
+
+            // 删除原日志文件
+            logFile.delete()
+        }
+
     }
 
 
