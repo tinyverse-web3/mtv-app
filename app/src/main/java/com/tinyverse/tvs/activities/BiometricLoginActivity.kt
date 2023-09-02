@@ -182,7 +182,7 @@ class BiometricLoginActivity : AppCompatActivity() {
         MessageDialog.build()
             .setTitle(getString(R.string.prompt_info_bio_not_configured))
             .setMessage(getString(R.string.prompt_info_bio_unlock_to_configured))
-            .setCancelable(true)
+            .setCancelable(false)
             .setOkButton(getString(R.string.dialog_button_confirm)) { baseDialog, _ ->
                 baseDialog.dismiss()
                 val callback = JsCallMtv.requestCodeMap[activityRequestCode]
@@ -204,7 +204,7 @@ class BiometricLoginActivity : AppCompatActivity() {
         MessageDialog.build()
             .setTitle(getString(R.string.credentials_have_changed))
             .setMessage(getString(R.string.prompt_info_bio_unlock_to_reconfigured))
-            .setCancelable(true)
+            .setCancelable(false)
             .setOkButton(getString(R.string.dialog_button_confirm)) { baseDialog, _ ->
                 baseDialog.dismiss()
                 val callback = JsCallMtv.requestCodeMap[activityRequestCode]

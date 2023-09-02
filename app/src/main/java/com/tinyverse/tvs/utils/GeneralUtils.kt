@@ -15,9 +15,11 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.webkit.URLUtil
 import android.widget.Toast
+import com.core.web.CallbackBean
 import com.kongzue.dialogx.DialogX
 import com.kongzue.dialogxmaterialyou.style.MaterialYouStyle
 import com.tinyverse.tvs.R
+import com.tinyverse.tvs.jsbridge.JsCallMtv
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -95,10 +97,26 @@ object GeneralUtils {
                         val status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
                         if (status == DownloadManager.STATUS_SUCCESSFUL) {
                             // 下载成功
-                            showToast(context!!,context.getString(R.string.toast_download_file_ok))
+                            JsCallMtv.requestCodeMap[JsCallMtv.REQUEST_CODE_GET_DOWNLOAD_STATUS]?.success(
+                                CallbackBean(
+                                    0,
+                                    context!!.getString(R.string.toast_download_file_ok),
+                                    "success"
+                                ),
+                                false
+                            )
+                            showToast(context!!, context.getString(R.string.toast_download_file_ok))
                         } else {
                             // 下载失败
-                            showToast(context!!,context.getString(R.string.toast_download_file_failed))
+                            JsCallMtv.requestCodeMap[JsCallMtv.REQUEST_CODE_GET_DOWNLOAD_STATUS]?.success(
+                                CallbackBean(
+                                    -1,
+                                    context!!.getString(R.string.toast_download_file_failed),
+                                    "failed"
+                                ),
+                                false
+                            )
+                            showToast(context!!, context.getString(R.string.toast_download_file_ok))
                         }
                     }
                     cursor.close()

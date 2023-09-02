@@ -23,14 +23,18 @@ class TVSApplication  : Application() {
         val sharedPrefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         var selectedLanguage = sharedPrefs.getString("language", null)
         if (selectedLanguage == null) {
-            selectedLanguage = "en" //default language
+            val systemDefaultLanguage = MultiLanguageService.getCurrentLanguage()
+            selectedLanguage =  systemDefaultLanguage//default uses the system language
         }
         when(selectedLanguage){
             "en" -> {
                 MultiLanguageService.changeLanguage(this, LanguageType.LANGUAGE_EN)
             }
-            "zh-CN" -> {
+            "zh-CN", "zh", "cn" -> {
                 MultiLanguageService.changeLanguage(this, LanguageType.LANGUAGE_ZH_CN)
+            }
+            else -> {
+                MultiLanguageService.changeLanguage(this, LanguageType.LANGUAGE_EN)
             }
         }
     }

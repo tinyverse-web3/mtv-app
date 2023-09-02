@@ -81,16 +81,16 @@ class VersionInfoService : Service() {
         if(tvsVersionOnLineStr.isNullOrEmpty()){
             tvsVersionOnLine = 0;
         }else{
-            tvsVersionOnLine = try {
-                tvsVersionOnLineStr.toInt()
-                Log.d(TAG, "current web page version: $tvsVersionOnLineStr")
+            try {
+                tvsVersionOnLine = tvsVersionOnLineStr.toInt()
+                Log.d(TAG, "current web page version: $tvsVersionOnLine")
             }catch (e: Exception){
                 e.printStackTrace()
-                0
+                tvsVersionOnLine = 0
             }
 
         }
-        Log.i(TAG, "current web page version: $tvsVersionOnLineStr")
+        Log.i(TAG, "current web page version: $tvsVersionOnLine")
         val sharedPrefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
         var tvsVersionSP = sharedPrefs.getInt("version", 0)
 

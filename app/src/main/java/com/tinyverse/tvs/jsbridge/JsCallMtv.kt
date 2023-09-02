@@ -177,9 +177,6 @@ class JsCallMtv(private val context: Context) {
     @JavascriptInterface
     fun accessLink(params: String, callback: Callback) {
         if (context is Activity) {
-            // 定义要访问的外部链接
-            val params = "https://www.baidu.com" // 替换为您要访问的链接
-
             if(params.isNullOrEmpty()){
                 callback.success(CallbackBean(-1, context.getString(R.string.jscall_access_link_url_error), "failed"), false)
                 return
@@ -196,6 +193,11 @@ class JsCallMtv(private val context: Context) {
                 callback.success(CallbackBean(-2, context.getString(R.string.jscall_access_link_url_error), "failed"), false)
             }
         }
+    }
+
+    @JavascriptInterface
+    fun getDownloadStatus(callback: Callback) {//通过callback返回下文件载状态
+        requestCodeMap[REQUEST_CODE_GET_DOWNLOAD_STATUS] = callback
     }
 
 
@@ -215,6 +217,7 @@ class JsCallMtv(private val context: Context) {
         const val REQUEST_CODE_SET_UP_BIOMETRIC: String = "1004"
         const val REQUEST_CODE_IS_BIOMETRIC_SET_UP: String = "1005"
         const val REQUEST_CODE_SET_UP_LANGUAGE: String = "1006"
+        const val REQUEST_CODE_GET_DOWNLOAD_STATUS: String = "1007"
         val requestCodeMap = HashMap<String, Callback>()
     }
 }
