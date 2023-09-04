@@ -166,10 +166,10 @@ class SplashScreenActivity : AppCompatActivity() {
         if (!folder.exists()) {
             if (folder.mkdirs()) {
                 // 文件夹创建成功
-                Toast.makeText(this, getString(R.string.toast_mtv_folder_created_ok), Toast.LENGTH_SHORT).show()
+                // Toast.makeText(this, getString(R.string.toast_mtv_folder_created_ok), Toast.LENGTH_SHORT).show()
             } else {
                 // 文件夹创建失败
-                Toast.makeText(this, getString(R.string.toast_mtf_folder_created_failed), Toast.LENGTH_SHORT).show()
+                //Toast.makeText(this, getString(R.string.toast_mtf_folder_created_failed), Toast.LENGTH_SHORT).show()
             }
         }
         return folder
