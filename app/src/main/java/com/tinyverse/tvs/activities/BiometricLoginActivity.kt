@@ -83,7 +83,7 @@ class BiometricLoginActivity : AppCompatActivity() {
                 cryptographyManager.getInitializedCipherForEncryption(secretKeyName)
             }catch (e: KeyPermanentlyInvalidatedException){
                 e.printStackTrace()
-                deleteKey(secretKeyName)
+                GeneralUtils.deleteBiometricKey()
                 cryptographyManager.getInitializedCipherForEncryption(secretKeyName)
             }
             val biometricPrompt =
@@ -235,19 +235,6 @@ class BiometricLoginActivity : AppCompatActivity() {
             }
         }
         finish()
-    }
-
-
-
-    private fun deleteKey(alias: String){
-        val keyStore = KeyStore.getInstance("AndroidKeyStore")
-        keyStore.load(null) // Keystore must be loaded before it can be accessed
-        try {
-            keyStore.deleteEntry(alias)
-        } catch (e: Exception) {
-            // 处理异常，比如密钥不存在等情况
-            e.printStackTrace()
-        }
     }
 
 }

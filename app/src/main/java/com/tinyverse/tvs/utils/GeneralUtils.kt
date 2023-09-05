@@ -8,6 +8,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -19,12 +20,16 @@ import com.core.web.CallbackBean
 import com.kongzue.dialogx.DialogX
 import com.kongzue.dialogxmaterialyou.style.MaterialYouStyle
 import com.tinyverse.tvs.R
+import com.tinyverse.tvs.biometric.CIPHERTEXT_WRAPPER
+import com.tinyverse.tvs.biometric.SHARED_PREFS_FILENAME
 import com.tinyverse.tvs.jsbridge.JsCallMtv
+import java.security.KeyStore
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.Timer
 import java.util.TimerTask
+
 
 object GeneralUtils {
 
@@ -169,4 +174,24 @@ object GeneralUtils {
 
     var secretKeyName = "mtv_biometric_encryption_key"
 
+    fun deleteBiometricKey(){
+        val keyStore = KeyStore.getInstance("AndroidKeyStore")
+        keyStore.load(null) // Keystore must be loaded before it can be accessed
+        try {
+            keyStore.deleteEntry(secretKeyName)
+        } catch (e: Exception) {
+            // 处理异常，比如密钥不存在等情况
+            e.printStackTrace()
+        }
+    }
+
+    fun clearBiometricConfig(context: Context){
+        deleteBiometricKey()
+        val sharedPrefs = context.getSharedPreferences(SHARED_PREFS_FILENAME, Context.MODE_PRIVATE)
+        if(sharedPrefs.contains(CIPHERTEXT_WRAPPER)){
+            val editor: SharedPreferences.Editor = sharedPrefs.edit()
+            editor.remove(CIPHERTEXT_WRAPPER)
+            editor.apply()
+        }
+    }
 }

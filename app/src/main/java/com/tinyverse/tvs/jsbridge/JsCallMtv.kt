@@ -15,6 +15,7 @@ import com.tinyverse.tvs.activities.FingerprintActivity
 import com.tinyverse.tvs.activities.MainActivity
 import com.tinyverse.tvs.activities.QrcodeScanActivity
 import com.tinyverse.tvs.biometric.AppUser
+import com.tinyverse.tvs.utils.GeneralUtils
 import com.tinyverse.tvs.utils.language.LanguageType
 import com.tinyverse.tvs.utils.language.MultiLanguageService
 import java.lang.Exception
@@ -133,18 +134,29 @@ class JsCallMtv(private val context: Context) {
             context.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out) // 添加淡入淡出动画效果
         }
     }
+    @JavascriptInterface
+    fun clearBiometrics(callback: Callback) {
+        GeneralUtils.clearBiometricConfig(context)
+        callback.success(CallbackBean(0,  context.getString(R.string.prompt_info_clear_bio_set_ok), "success"), false)
+
+    }
 
     @JavascriptInterface
     fun setupLanguage(params: String, callback: Callback) {
         requestCodeMap[REQUEST_CODE_SET_UP_LANGUAGE] = callback
         if (context is Activity) {
             val sharedPrefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-            val editor = sharedPrefs.edit()
             var selectedLanguage = params.trim()
             if(selectedLanguage.isNullOrEmpty()){
                 callback.success(CallbackBean(-1, context.getString(R.string.language_switch_failed), "failed"), false)
                 return
             }
+            var savedLanguage = sharedPrefs.getString("language", null)
+            if(!savedLanguage.isNullOrEmpty() && savedLanguage == selectedLanguage){
+                callback.success(CallbackBean(0,  context.getString(R.string.language_switch_successfully), "success"), false)
+                return
+            }
+            val editor = sharedPrefs.edit()
             editor.putString("language", params.trim()) // 'selectedLanguage' 是用户选择的新语言
             editor.apply()
             //val handler = Handler(Looper.getMainLooper())

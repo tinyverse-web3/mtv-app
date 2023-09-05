@@ -63,8 +63,11 @@ class CrashActivity : AppCompatActivity() {
     }
 
     private fun saveErrorLogToFile(exception: Throwable): File? {
-        val fileName = "tvs_error.log"
-        backupLog(fileName)
+//        val fileName = "tvs_error.log"
+//        backupLog(fileName)
+        val sdf = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+        val currentDateAndTime = sdf.format(Date())
+        val fileName = "tvs_error_$currentDateAndTime.log"
         val errorLog = collectErrorLog(exception)
         var logcatLog = collectLogcatLog()
         val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
@@ -74,6 +77,7 @@ class CrashActivity : AppCompatActivity() {
                 writer.appendLine("-------------------------------------------------") // 添加分隔符
                 writer.appendLine(logcatLog)
                 writer.appendLine(errorLog)
+                writer.close()
             }
             return logFile
         } catch (e: IOException) {

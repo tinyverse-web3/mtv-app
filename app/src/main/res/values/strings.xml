@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TVS</string>
+    <string name="app_name">TinyVerse Space</string>
     <string name="app_full_name">TinyVerse Space</string>
     <string name="action_settings">Settings</string>
     <!-- Strings used for fragments for navigation -->
@@ -36,6 +36,7 @@
     <string name="prompt_info_description">TVS is using Android biometric authentication</string>
     <string name="prompt_info_use_app_password">Use app password</string>
     <string name="prompt_info_bio_set_ok">Biometrics setup successful</string>
+    <string name="prompt_info_clear_bio_set_ok">Clear biometrics config successful</string>
     <string name="toast_no_bio_registered">The user cannot be authenticated because no biometric or device credentials are registered</string>
     <string name="prompt_info_bio_verify_ok">Biometric authentication successful</string>
     <string name="prompt_info_bio_verify_error">Biometric error</string>
