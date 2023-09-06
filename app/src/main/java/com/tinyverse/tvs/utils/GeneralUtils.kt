@@ -23,6 +23,11 @@ import com.tinyverse.tvs.R
 import com.tinyverse.tvs.biometric.CIPHERTEXT_WRAPPER
 import com.tinyverse.tvs.biometric.SHARED_PREFS_FILENAME
 import com.tinyverse.tvs.jsbridge.JsCallMtv
+import java.io.BufferedReader
+import java.io.File
+import java.io.FileWriter
+import java.io.InputStreamReader
+import java.nio.file.Files
 import java.security.KeyStore
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -194,4 +199,43 @@ object GeneralUtils {
             editor.apply()
         }
     }
+
+    fun saveErrorLogToFile( context: Context, xCrashLogFile: File): File? {
+        val sdf = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+        val currentDateAndTime = sdf.format(Date())
+        val fileName = "tvs_error_$currentDateAndTime.log"
+        var logcatLog = collectLogcatLog(context)
+        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        val logFile = File(downloadsDir, fileName)
+        try {
+            //向日志中添加TVS App自己的logcat
+            FileWriter(xCrashLogFile, true).use { writer ->
+                writer.appendLine("TVS App Logcat -------------------------------------------------") // 添加分隔符
+                writer.appendLine(logcatLog)
+                writer.close()
+            }
+            // 使用 Files.move() 方法移动文件
+            Files.move(xCrashLogFile.toPath(), logFile.toPath())
+            return logFile
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return null
+    }
+
+    private fun collectLogcatLog(context: Context):String{
+        val maxLines = 200 // 要获取的日志行数
+        val packageName = context.packageName
+        val command = "logcat -d -t $maxLines | grep $packageName"
+        val process = Runtime.getRuntime().exec(command)
+        val reader = BufferedReader(InputStreamReader(process.inputStream))
+        val logcatOutput = StringBuilder()
+        var line: String?
+
+        while (reader.readLine().also { line = it } != null) {
+            logcatOutput.appendLine(line)
+        }
+        return logcatOutput.toString()
+    }
+
 }

@@ -135,6 +135,7 @@ dependencies {
 
     //CrashHandler
     implementation 'com.github.emirhankolver:GlobalExceptionHandler:1.0.1'
+    implementation 'com.iqiyi.xcrash:xcrash-android-lib:3.1.0'
 
 }
 
