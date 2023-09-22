@@ -3,8 +3,10 @@ package com.tinyverse.tvs.activities
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -45,6 +47,7 @@ import com.kongzue.dialogx.dialogs.MessageDialog
 import com.tinyverse.tvs.BuildConfig
 import com.tinyverse.tvs.R
 import com.tinyverse.tvs.jsbridge.JsCallMtv
+import com.tinyverse.tvs.utils.Constants
 import com.tinyverse.tvs.utils.GeneralUtils
 import com.tinyverse.tvs.utils.language.MultiLanguageService
 import com.tinyverse.tvs.views.progress.LoadView
@@ -77,6 +80,15 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         const val CAMERA_PERMISSION_REQUEST_CODE: Int = 10001
+    }
+
+    private val exitAppReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == "$packageName.EXIT_APP") {
+                finishAffinity()
+                exitProcess(0)
+            }
+        }
     }
 
     private val requestPermissionLauncher =
@@ -146,6 +158,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        //注册一个退出应用的广播接收器
+        val filter = IntentFilter("$packageName.EXIT_APP")
+        registerReceiver(exitAppReceiver, filter)
+
         //是否要清除Cache
         isNeedClearCache = intent.getBooleanExtra("is_need_clear_cache", true)
 
@@ -170,16 +186,12 @@ class MainActivity : AppCompatActivity() {
         jsInject = JsInject(webView!!)
 
         //加载主页面
-        //val url = "https://service.tinyverse.space/test.html"
-        var url = "https://dev.tinyverse.space/"
-        //var url = "http://192.168.1.104:5173"
-        //var url = "https://webcam-test.com/"
-        //val url = "https://dragonir.github.io/h5-scan-qrcode/#/"
-        loadUrl(url)
+        loadUrl(Constants.TVS_WEB_URL)
 
         //主页面url特征字符串：表示回到主页面
         homeFeatureString = arrayOf("/home/space", "/unlock", "/index")
     }
+
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(MultiLanguageService.changeContextLocale(newBase))

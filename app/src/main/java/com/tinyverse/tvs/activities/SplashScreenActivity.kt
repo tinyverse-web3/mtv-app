@@ -28,7 +28,9 @@ import com.tinyverse.tvs.R
 import com.tinyverse.tvs.service.MtvService
 import com.tinyverse.tvs.service.SocketConnect
 import com.tinyverse.tvs.service.VersionInfoService
+import com.tinyverse.tvs.utils.Constants
 import com.tinyverse.tvs.utils.GeneralUtils
+import com.tinyverse.tvs.utils.ServiceUtils
 import com.tinyverse.tvs.utils.language.MultiLanguageService
 import java.io.File
 import kotlin.system.exitProcess
@@ -38,14 +40,13 @@ import kotlin.system.exitProcess
 class SplashScreenActivity : AppCompatActivity() {
 
     companion object {
-        private const val FOLDER_NAME = ".mtv_repo"
+        private const val FOLDER_NAME = Constants.MTV_SERVICE_ROOT_FOLDER_NAME
         private const val REQUEST_PERMISSION = 1
         private const val REQUEST_MANAGE_ALL_FILES_ACCESS_PERMISSION_CODE = 1001
         var mtvRootPath = ""
         val permissions = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
         lateinit var requestPermissionLauncher : ActivityResultLauncher<Intent>
         private const val TAG = "SplashScreenActivity"
-        private const val getVersionUrl = "https://dev.tinyverse.space/version.txt"
     }
 
     private val expectedBroadcastCount = 2
@@ -89,8 +90,8 @@ class SplashScreenActivity : AppCompatActivity() {
 
             //数据只保存在/sdcard/Android/com.tinyverse.tvs/目录中 注意：删除App，用户数据也会被删除
             launchMtvServer()
-            launchSocketServer()
-            launchVersionServer(getVersionUrl)
+            ServiceUtils.launchSocketServer(this@SplashScreenActivity)
+            launchVersionServer(Constants.TVS_WEB_VERSION_URL)
         }
         // 注册广播接收器
         //通过serverCompletedReceiver广播器来接收服务是否启动OK
@@ -116,13 +117,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
 
     private fun launchMtvServer(){
-        //创建MTV服务所需要的存储目录
-        mtvRootPath = createFolderIfNotExists().absolutePath
-        // 启动后台服务
-        val serviceIntent = Intent(this@SplashScreenActivity, MtvService::class.java).apply {
-            putExtra("mtv_root_path", mtvRootPath)
-        }
-        startService(serviceIntent)
+        ServiceUtils.launchMtvServer(this@SplashScreenActivity)
     }
 
     private fun checkBroadcastResult(dataMap: HashMap<String, Boolean>) {
@@ -158,22 +153,7 @@ class SplashScreenActivity : AppCompatActivity() {
         startService(versionServiceIntent)
     }
 
-    private fun createFolderIfNotExists() : File{
-        //val folderPath = "${Environment.getExternalStoragePublicDirectory("Android")}/$FOLDER_NAME" //数据保存在/sdcard/Android目录中， 删除App，用户数据也会被保留
-        val folderPath = "${this.getExternalFilesDir(null)}/$FOLDER_NAME" //数据只保存在/sdcard/Android/com.tinyverse.tvs/，删除App，用户数据也会被删除
-        val folder = File(folderPath)
 
-        if (!folder.exists()) {
-            if (folder.mkdirs()) {
-                // 文件夹创建成功
-                // Toast.makeText(this, getString(R.string.toast_mtv_folder_created_ok), Toast.LENGTH_SHORT).show()
-            } else {
-                // 文件夹创建失败
-                //Toast.makeText(this, getString(R.string.toast_mtf_folder_created_failed), Toast.LENGTH_SHORT).show()
-            }
-        }
-        return folder
-    }
 
 
     private fun isStoragePermissionGranted(): Boolean {

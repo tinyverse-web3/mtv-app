@@ -20,6 +20,7 @@ import com.core.web.CallbackBean
 import com.kongzue.dialogx.DialogX
 import com.kongzue.dialogxmaterialyou.style.MaterialYouStyle
 import com.tinyverse.tvs.R
+import com.tinyverse.tvs.activities.SplashScreenActivity
 import com.tinyverse.tvs.biometric.CIPHERTEXT_WRAPPER
 import com.tinyverse.tvs.biometric.SHARED_PREFS_FILENAME
 import com.tinyverse.tvs.jsbridge.JsCallMtv
@@ -236,6 +237,23 @@ object GeneralUtils {
             logcatOutput.appendLine(line)
         }
         return logcatOutput.toString()
+    }
+
+    fun createFolderIfNotExists(context: Context) : File{
+        //val folderPath = "${Environment.getExternalStoragePublicDirectory("Android")}/$FOLDER_NAME" //数据保存在/sdcard/Android目录中， 删除App，用户数据也会被保留
+        val folderPath = "${context.getExternalFilesDir(null)}/${Constants.MTV_SERVICE_ROOT_FOLDER_NAME}" //数据只保存在/sdcard/Android/com.tinyverse.tvs/，删除App，用户数据也会被删除
+        val folder = File(folderPath)
+
+        if (!folder.exists()) {
+            if (folder.mkdirs()) {
+                // 文件夹创建成功
+                // Toast.makeText(this, getString(R.string.toast_mtv_folder_created_ok), Toast.LENGTH_SHORT).show()
+            } else {
+                // 文件夹创建失败
+                //Toast.makeText(this, getString(R.string.toast_mtf_folder_created_failed), Toast.LENGTH_SHORT).show()
+            }
+        }
+        return folder
     }
 
 }

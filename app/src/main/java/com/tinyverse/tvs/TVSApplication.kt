@@ -17,6 +17,7 @@ class TVSApplication  : Application() {
     private val TAG = "TVSApplication"
 
     override fun onCreate() {
+        Log.d(TAG, "TVSApplication-->onCreate()")
         super.onCreate()
         // 在这里添加您的应用级别初始化和配置逻辑
         // 例如：初始化某些库、设置默认语言、配置全局变量等
@@ -27,8 +28,8 @@ class TVSApplication  : Application() {
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
 
-        // callback for java crash, native crash and ANR
-        val callback = ICrashCallback { logPath, emergency ->
+        // callback for java crash
+        val javaCallback = ICrashCallback { logPath, emergency ->
             if(!logPath.isNullOrEmpty()){
                 Log.d(
                     TAG, "log path: " + (logPath ?: "(null)") + ", emergency: " + (emergency
@@ -38,7 +39,8 @@ class TVSApplication  : Application() {
             }
         }
 
-        val nativeCallback = ICrashCallback { logPath, emergency ->
+        // callback for native crash and ANR
+        val nativeAnrCallback = ICrashCallback { logPath, emergency ->
             if(!logPath.isNullOrEmpty()){
                 Log.d(
                     TAG, "log path: " + (logPath ?: "(null)") + ", emergency: " + (emergency
@@ -53,8 +55,9 @@ class TVSApplication  : Application() {
             }
         }
         XCrash.init(this, XCrash.InitParameters()
-            .setJavaCallback(callback)
-            .setNativeCallback(nativeCallback)
+            .setJavaCallback(javaCallback)
+            .setNativeCallback(nativeAnrCallback)
+            .setAnrCallback(nativeAnrCallback)
         )
     }
 
