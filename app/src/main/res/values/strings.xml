@@ -105,6 +105,7 @@
     <string name="crash_log_file_prompt">Report Us: </string>
     <string name="jscall_access_link_url_error">The url parameter is wrong or does not exist</string>
     <string name="jscall_access_link_url_ok">System browser successfully called</string>
+    <string name="app_version_number">app version</string>
 
 
 </resources>

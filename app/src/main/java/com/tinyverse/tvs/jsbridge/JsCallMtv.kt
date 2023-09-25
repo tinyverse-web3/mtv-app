@@ -9,6 +9,7 @@ import android.webkit.JavascriptInterface
 import android.widget.Toast
 import com.core.web.Callback
 import com.core.web.CallbackBean
+import com.tinyverse.tvs.BuildConfig
 import com.tinyverse.tvs.R
 import com.tinyverse.tvs.activities.BiometricLoginActivity
 import com.tinyverse.tvs.activities.FingerprintActivity
@@ -19,6 +20,7 @@ import com.tinyverse.tvs.utils.GeneralUtils
 import com.tinyverse.tvs.utils.language.LanguageType
 import com.tinyverse.tvs.utils.language.MultiLanguageService
 import java.lang.Exception
+
 
 class JsCallMtv(private val context: Context) {
 
@@ -210,6 +212,12 @@ class JsCallMtv(private val context: Context) {
     @JavascriptInterface
     fun getDownloadStatus(callback: Callback) {//通过callback返回下文件载状态
         requestCodeMap[REQUEST_CODE_GET_DOWNLOAD_STATUS] = callback
+    }
+
+    @JavascriptInterface
+    fun getAppVersion(callback: Callback) {//通过callback返回当前App版本号
+       val versionName = BuildConfig.VERSION_NAME ?: "1.0.0"
+        callback.success(CallbackBean(0, context.getString(R.string.app_version_number), versionName), false)
     }
 
 
