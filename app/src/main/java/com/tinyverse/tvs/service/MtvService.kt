@@ -3,7 +3,9 @@ package com.tinyverse.tvs.service
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import com.tinyverse.tvs.utils.Constants
 import com.tinyverse.tvs.utils.language.MultiLanguageService
@@ -11,6 +13,8 @@ import core.Core
 
 
 class MtvService : Service() {
+    private val handler = Handler(Looper.getMainLooper())
+    private val delayMillis: Long = 10000 // 10秒钟执行一次任务
     val TAG = "MtvService"
     override fun onCreate() {
         super.onCreate()
@@ -44,6 +48,8 @@ class MtvService : Service() {
                 sendNotification(this, false)
             }
         }.start()
+        //让service与mtv server(go)保持同步在后台运行，执行一个空的定时任务，防止service被系统立即调用onDestory()被回收
+        handler.post(mtvRunnable)
         // START_STICKY 表示服务被杀死后会自动重启
         return START_STICKY
     }
@@ -66,5 +72,11 @@ class MtvService : Service() {
         val intent = Intent("$packageName.MTV_SERVER_LAUNCH")
         intent.putExtra("server_is_ok", result)
         context.sendBroadcast(intent)
+    }
+
+    private val mtvRunnable: Runnable = object : Runnable {
+        override fun run() {
+            handler.postDelayed(this, delayMillis)
+        }
     }
 }
