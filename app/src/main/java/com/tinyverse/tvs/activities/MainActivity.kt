@@ -18,6 +18,7 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
+import android.util.Log
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -49,8 +50,13 @@ import com.tinyverse.tvs.R
 import com.tinyverse.tvs.jsbridge.JsCallMtv
 import com.tinyverse.tvs.utils.Constants
 import com.tinyverse.tvs.utils.GeneralUtils
+import com.tinyverse.tvs.utils.ServiceUtils
 import com.tinyverse.tvs.utils.language.MultiLanguageService
 import com.tinyverse.tvs.views.progress.LoadView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -75,6 +81,7 @@ class MainActivity : AppCompatActivity() {
     private val resetDelayMillis = 2000L // 设置延迟时间，单位为毫秒
     private var isBackPressedOnce = false
     private var isNeedClearCache = false
+    private var isFirstTimeResume = true
 
 
 
@@ -190,6 +197,33 @@ class MainActivity : AppCompatActivity() {
 
         //主页面url特征字符串：表示回到主页面
         homeFeatureString = arrayOf("/home/space", "/unlock", "/index")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "MainActivity-->onResume()")
+        if (isFirstTimeResume) {
+            // 这是第一次调用 onResume
+            Log.i(TAG, "MainActivity-->onResume(): there is no need to do anything when calling onResume for the first time." )
+            isFirstTimeResume = false
+           return
+        }
+        // 使用协程在后台线程中执行检查端口的操作
+        val job = GlobalScope.launch(Dispatchers.IO) {
+            val isPortAvailable = ServiceUtils.isPortListening("127.0.0.1", Constants.MTV_SERVICE_PORT.toInt()) // 传入你要检查的端口号
+            withContext(Dispatchers.Main) {
+                // 在主线程中根据结果执行操作
+                if (!isPortAvailable) {
+                    Log.w(TAG, "MainActivity-->onResume(): the port(" +  Constants.MTV_SERVICE_PORT + ") is not listening, the service has exited and the application needs to be restarted.")
+                    // 端口可用，服务已经退出了需要重启应用
+                    finish()
+                    val intent = Intent(this@MainActivity, SplashScreenActivity::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    startActivity(intent)
+                    exitProcess(0)
+                }
+            }
+        }
     }
 
 

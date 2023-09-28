@@ -31,7 +31,10 @@ import com.tinyverse.tvs.service.SocketConnect
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileWriter
+import java.io.IOException
 import java.io.InputStreamReader
+import java.net.InetSocketAddress
+import java.net.Socket
 import java.nio.file.Files
 import java.security.KeyStore
 import java.text.SimpleDateFormat
@@ -49,7 +52,7 @@ object ServiceUtils {
         SplashScreenActivity.mtvRootPath = mtvFolder.absolutePath
         // 启动后台服务
         val serviceIntent = Intent(context, MtvService::class.java).apply {
-            putExtra("mtv_root_path", SplashScreenActivity.mtvRootPath)
+            putExtra("mtv_root_path", mtvFolder.absolutePath)
         }
         context.startService(serviceIntent)
     }
@@ -82,6 +85,18 @@ object ServiceUtils {
             }
         }
         return false
+    }
+
+    fun isPortListening(host: String, port: Int): Boolean {
+        try {
+            val socket = Socket()
+            socket.connect(InetSocketAddress(host, port), 500) // 连接超时设置为1秒
+            socket.close()
+            return true // 连接成功，端口在监听中
+        } catch (e: IOException) {
+            // 连接失败，端口未监听
+            return false
+        }
     }
 
 }
