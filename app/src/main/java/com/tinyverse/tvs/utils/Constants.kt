@@ -5,6 +5,8 @@ object Constants {
     const val MTV_SERVICE_PORT = "9888"
     const val MTV_SERVICE_TYPE = "sdk"
     const val MTV_SERVICE_APP_NAME = "mtv"
+    //const val MTV_SERVICE_TEST_API = "http://127.0.0.1:$MTV_SERVICE_PORT/sdk/test"
+    const val MTV_SERVICE_TEST_API = "http://127.0.0.1:$MTV_SERVICE_PORT/sdk/hasPassword"
     const val TVS_WEB_URL = "https://dev.tinyverse.space/" //web view main
     const val TVS_WEB_VERSION_URL = "https://dev.tinyverse.space/version.txt"
 
@@ -14,4 +16,13 @@ object Constants {
     //var url = "http://192.168.1.104:5173"
     //var url = "https://webcam-test.com/"
     //val url = "https://dragonir.github.io/h5-scan-qrcode/#/"
+
+    enum class ServerMsg{
+        LAUNCH_SUCCESS,
+        LAUNCH_FAILED,
+        PORT_LISTENING_OK,
+        PORT_LISTENING_FAIL,
+        API_ACCESS_OK,
+        API_ACCESS_FAIL
+    }
 }

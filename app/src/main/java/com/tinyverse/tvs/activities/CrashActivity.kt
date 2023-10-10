@@ -1,6 +1,5 @@
 package com.tinyverse.tvs.activities
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -17,8 +16,6 @@ import java.util.Date
 import java.util.Locale
 import kotlin.system.exitProcess
 
-
-@SuppressLint("SetTextI18n")
 
 class CrashActivity : AppCompatActivity() {
 

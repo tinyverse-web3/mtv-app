@@ -25,14 +25,12 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.kongzue.dialogx.dialogs.MessageDialog
 import com.tinyverse.tvs.R
-import com.tinyverse.tvs.service.MtvService
 import com.tinyverse.tvs.service.SocketConnect
 import com.tinyverse.tvs.service.VersionInfoService
 import com.tinyverse.tvs.utils.Constants
 import com.tinyverse.tvs.utils.GeneralUtils
 import com.tinyverse.tvs.utils.ServiceUtils
 import com.tinyverse.tvs.utils.language.MultiLanguageService
-import java.io.File
 import kotlin.system.exitProcess
 
 
@@ -49,16 +47,19 @@ class SplashScreenActivity : AppCompatActivity() {
         private const val TAG = "SplashScreenActivity"
     }
 
-    private val expectedBroadcastCount = 2
-    private val broadcastData = HashMap<String, Boolean>()
-
+    private val broadcastData = HashMap<String, Any>()
 
     private val mtvServerReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             // 接收到任务完成的广播，启动 MainActivity
             val serverIsOk = intent.getBooleanExtra("server_is_ok", false)
+            var serverMsg =  intent.getStringExtra("server_msg")
             // 处理第一个服务的广播
             broadcastData["server_is_ok"] = serverIsOk
+            if(serverMsg.isNullOrEmpty()){
+                serverMsg = Constants.ServerMsg.LAUNCH_FAILED.name
+            }
+            broadcastData["server_msg"] = serverMsg
             checkBroadcastResult(broadcastData)
         }
     }
@@ -120,23 +121,52 @@ class SplashScreenActivity : AppCompatActivity() {
         ServiceUtils.launchMtvServer(this@SplashScreenActivity)
     }
 
-    private fun checkBroadcastResult(dataMap: HashMap<String, Boolean>) {
-        if (dataMap.size == 2) {//两个服务都完成了，执行下一步任务
-            // 接收到任务完成的广播，启动 MainActivity
-            val serverIsOk = dataMap["server_is_ok"]
-            if(serverIsOk!!){
-                val mainIntent = Intent(this@SplashScreenActivity, MainActivity::class.java)
-                mainIntent.putExtra("is_need_clear_cache",  dataMap["is_need_clear_cache"])
-                //Toast.makeText(context, getString(R.string.toast_dauth_launch_success), Toast.LENGTH_SHORT).show()
-                startActivity(mainIntent)
-                // 关闭当前活动
-                finish()
-            }else{
-                //提示用户进行操作，重启应用还是退出应用
-                Toast.makeText(this, getString(R.string.toast_dauth_launch_failed), Toast.LENGTH_LONG).show()
-                promptUserForAction()
+    private fun checkBroadcastResult(dataMap: HashMap<String, Any>) {
+        val keysToCheck = listOf("server_is_ok", "is_need_clear_cache")
+        if (!checkKeysExist(keysToCheck)) {
+            return
+        }
+        //两个服务都完成了，执行下一步任务
+        // 接收到任务完成的广播，启动 MainActivity
+        val serverIsOk = dataMap["server_is_ok"] as? Boolean
+        val serverMsg =  dataMap["server_msg"] as? String
+        val isNeedClearCache = dataMap["is_need_clear_cache"] as? Boolean
+        if(serverIsOk!!){
+            val mainIntent = Intent(this@SplashScreenActivity, MainActivity::class.java)
+            mainIntent.putExtra("is_need_clear_cache",  isNeedClearCache)
+            //Toast.makeText(context, getString(R.string.toast_dauth_launch_success), Toast.LENGTH_SHORT).show()
+            startActivity(mainIntent)
+            // 关闭当前活动
+            finish()
+        }else{
+            //提示用户进行操作，重启应用还是退出应用
+            Toast.makeText(this, getString(R.string.toast_dauth_launch_failed), Toast.LENGTH_LONG).show()
+            val hasExitBtn = true
+            var hasRebootBtn = true
+            var promptMsg :String
+            when(serverMsg){
+                Constants.ServerMsg.LAUNCH_FAILED.name, Constants.ServerMsg.PORT_LISTENING_FAIL.name ->{
+                    promptMsg =  getString(R.string.mtv_service_launch_failed_message)
+                }
+                Constants.ServerMsg.API_ACCESS_FAIL.name -> {
+                    promptMsg = getString(R.string.mtv_service_api_access_failed_message)
+                    hasRebootBtn = false
+                }
+                else -> {
+                    promptMsg = getString(R.string.mtv_service_launch_failed_message)
+                }
+            }
+            promptUserForAction(promptMsg, hasRebootBtn, hasExitBtn)
+        }
+    }
+
+    private fun checkKeysExist(keys: List<String>): Boolean {
+        for (key in keys) {
+            if (!broadcastData.containsKey(key)) {
+                return false
             }
         }
+        return true
     }
 
     private fun launchSocketServer(){
@@ -251,12 +281,13 @@ class SplashScreenActivity : AppCompatActivity() {
         }
     }
 
-    private fun promptUserForAction(){
-        MessageDialog.build()
+    private fun promptUserForAction(errMsg: String, hasRebootBtn: Boolean, hasExitBtn: Boolean){
+        var messageDialog = MessageDialog.build()
             .setTitle(getString(R.string.dialog_title_tip))
-            .setMessage(getString(R.string.mtv_service_launch_failed_message))
-            .setCancelable(true)
-            .setOkButton(getString(R.string.mtv_service_dialog_button_restart)) { baseDialog, _ ->
+            .setMessage(errMsg)
+            .setCancelable(false)
+        if(hasRebootBtn) {
+            messageDialog.setOkButton(getString(R.string.mtv_service_dialog_button_restart)) { baseDialog, _ ->
                 baseDialog.dismiss()
                 // 重启应用
                 // 延迟3秒后重新启动应用
@@ -270,15 +301,20 @@ class SplashScreenActivity : AppCompatActivity() {
                 }, 3000)
                 false
             }
-            .setCancelButton(getString(R.string.mtv_service_dialog_button_exit)) { baseDialog, _ ->
+        }
+        if(hasExitBtn) {
+            messageDialog.setCancelButton(getString(R.string.mtv_service_dialog_button_exit)) { baseDialog, _ ->
                 // 关闭对话框
                 baseDialog.dismiss()
                 // 退出应用
                 exitProcess(0)
                 false
             }
-            .show()
+        }
+        messageDialog.show()
     }
+
+
 
     private fun startLogoAnimator(logoImageView: ImageView){
         // 创建 ValueAnimator 实现缩放动画

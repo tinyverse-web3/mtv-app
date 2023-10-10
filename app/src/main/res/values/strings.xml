@@ -76,6 +76,7 @@
 
     <!-- for mtv service launch -->
     <string name="mtv_service_launch_failed_message">The service failed to start. Do you want to restart the application?</string>
+    <string name="mtv_service_api_access_failed_message">App is restricted from accessing the network, please check your phone settings.</string>
 
 
     <!-- for toast-->

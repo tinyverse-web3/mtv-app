@@ -75,6 +75,7 @@
 
     <!-- for mtv service launch -->
     <string name="mtv_service_launch_failed_message">服务启动失败，是否重启应用？</string>
+    <string name="mtv_service_api_access_failed_message">App被限制访问网络，请检查手机设置。</string>
 
 
     <!-- for toast-->
@@ -106,6 +107,7 @@
     <string name="jscall_access_link_url_ok">成功调用系统浏览器</string>
     <string name="prompt_info_clear_bio_set_ok">清除生物识别配置成功</string>
     <string name="app_version_number">应用版本</string>
+
 
 
 </resources>

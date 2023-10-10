@@ -211,6 +211,10 @@ class MainActivity : AppCompatActivity() {
         // 使用协程在后台线程中执行检查端口的操作
         val job = GlobalScope.launch(Dispatchers.IO) {
             val isPortAvailable = ServiceUtils.isPortListening("127.0.0.1", Constants.MTV_SERVICE_PORT.toInt()) // 传入你要检查的端口号
+            var checkApiIsOK = isPortAvailable
+            if(isPortAvailable){//进一步检查api是否可用
+                checkApiIsOK = ServiceUtils.checkServiceAPIAvailability(2)
+            }
             withContext(Dispatchers.Main) {
                 // 在主线程中根据结果执行操作
                 if (!isPortAvailable) {
@@ -221,9 +225,26 @@ class MainActivity : AppCompatActivity() {
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                     startActivity(intent)
                     exitProcess(0)
+                }else if(!checkApiIsOK){
+                    promptUserForExitAction(getString(R.string.mtv_service_api_access_failed_message))
                 }
             }
         }
+    }
+
+    private fun promptUserForExitAction(errMsg: String){
+        var messageDialog = MessageDialog.build()
+            .setTitle(getString(R.string.dialog_title_tip))
+            .setMessage(errMsg)
+            .setCancelable(false)
+            .setCancelButton(getString(R.string.mtv_service_dialog_button_exit)) { baseDialog, _ ->
+                // 关闭对话框
+                baseDialog.dismiss()
+                // 退出应用
+                exitProcess(0)
+                false
+            }
+        messageDialog.show()
     }
 
 

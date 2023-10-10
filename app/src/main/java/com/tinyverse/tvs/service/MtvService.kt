@@ -3,17 +3,12 @@ package com.tinyverse.tvs.service
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
 import android.util.Log
 import com.tinyverse.tvs.utils.Constants
 import com.tinyverse.tvs.utils.ServiceUtils
 import com.tinyverse.tvs.utils.language.MultiLanguageService
 import core.Core
-import java.io.IOException
-import java.net.InetSocketAddress
-import java.net.Socket
 
 
 class MtvService : Service() {
@@ -44,14 +39,26 @@ class MtvService : Service() {
                     Log.d(TAG, "MtvService-->onStartCommand()-->check mtv server start")
                     val checkIsOK =  Core.checkServerIsOK(30)
                     Log.d(TAG, "MtvService-->onStartCommand()-->check mtv server end")
-                    // 发送广播通知任务完成
-                    sendNotification(this, checkIsOK)
+                    if(checkIsOK){
+                        val checkApiIsOK = ServiceUtils.checkServiceAPIAvailability(5)
+                        if (checkApiIsOK) {
+                        // 发送广播通知任务完成
+                        sendNotification(
+                            true,
+                            Constants.ServerMsg.LAUNCH_SUCCESS.name
+                            )
+                        }else{
+                            sendNotification(false, Constants.ServerMsg.API_ACCESS_FAIL.name)
+                        }
+                    }else{
+                        sendNotification(false, Constants.ServerMsg.PORT_LISTENING_FAIL.name)
+                    }
                 }else{
                     Log.d(TAG, "MtvService-->onStartCommand()-->Service already exists and does not need to be started.")
                 }
             } catch (e: Exception){
                 e.printStackTrace()
-                sendNotification(this, false)
+                sendNotification(false, Constants.ServerMsg.LAUNCH_FAILED.name)
             }
         }.start()
         // START_STICKY 表示服务被杀死后会自动重启
@@ -72,9 +79,10 @@ class MtvService : Service() {
 //        sendBroadcast(intent)
     }
 
-    private fun sendNotification(context: Context, result: Boolean){
+    private fun sendNotification(result: Boolean, message: String){
         val intent = Intent("$packageName.MTV_SERVER_LAUNCH")
         intent.putExtra("server_is_ok", result)
-        context.sendBroadcast(intent)
+        intent.putExtra("server_msg", message)
+        this.sendBroadcast(intent)
     }
 }

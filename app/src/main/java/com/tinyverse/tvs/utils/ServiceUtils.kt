@@ -1,47 +1,20 @@
 package com.tinyverse.tvs.utils
 
-import android.annotation.SuppressLint
 import android.app.ActivityManager
-import android.app.DownloadManager
-import android.content.BroadcastReceiver
-import android.content.ContentResolver
-import android.content.ContentValues
 import android.content.Context
 import android.content.Context.ACTIVITY_SERVICE
 import android.content.Intent
-import android.content.IntentFilter
-import android.content.SharedPreferences
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.net.Uri
-import android.os.Environment
-import android.provider.MediaStore
-import android.webkit.URLUtil
-import android.widget.Toast
-import com.core.web.CallbackBean
-import com.kongzue.dialogx.DialogX
-import com.kongzue.dialogxmaterialyou.style.MaterialYouStyle
-import com.tinyverse.tvs.R
 import com.tinyverse.tvs.activities.SplashScreenActivity
-import com.tinyverse.tvs.biometric.CIPHERTEXT_WRAPPER
-import com.tinyverse.tvs.biometric.SHARED_PREFS_FILENAME
-import com.tinyverse.tvs.jsbridge.JsCallMtv
 import com.tinyverse.tvs.service.MtvService
 import com.tinyverse.tvs.service.SocketConnect
-import java.io.BufferedReader
-import java.io.File
-import java.io.FileWriter
+import com.tinyverse.tvs.utils.Constants.MTV_SERVICE_TEST_API
+import okhttp3.MediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
 import java.io.IOException
-import java.io.InputStreamReader
 import java.net.InetSocketAddress
 import java.net.Socket
-import java.nio.file.Files
-import java.security.KeyStore
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.Timer
-import java.util.TimerTask
 
 
 object ServiceUtils {
@@ -99,4 +72,30 @@ object ServiceUtils {
         }
     }
 
+    fun checkServiceAPIAvailability(timeoutSeconds: Long): Boolean{
+        val client = OkHttpClient.Builder()
+            .connectTimeout(timeoutSeconds, java.util.concurrent.TimeUnit.SECONDS)
+            .writeTimeout(timeoutSeconds, java.util.concurrent.TimeUnit.SECONDS)
+            .readTimeout(timeoutSeconds, java.util.concurrent.TimeUnit.SECONDS)
+            .build()
+
+        val requestBody: RequestBody =
+            RequestBody.create(MediaType.parse("application/json; charset=utf-8"), "")
+
+        val request = Request.Builder()
+            .url(MTV_SERVICE_TEST_API)
+            .post(requestBody)
+            .build()
+
+        try {
+            val response = client.newCall(request).execute()
+            // 检查 HTTP 状态码是否在 200...299 范围内
+            if (response.isSuccessful) {
+                return true // 服务可用
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        return false // 服务不可用或超时
+    }
 }
