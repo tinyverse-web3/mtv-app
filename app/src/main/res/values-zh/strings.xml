@@ -107,7 +107,8 @@
     <string name="jscall_access_link_url_ok">成功调用系统浏览器</string>
     <string name="prompt_info_clear_bio_set_ok">清除生物识别配置成功</string>
     <string name="app_version_number">应用版本</string>
-
+    <string name="prompt_google_login_ok">Google登录成功</string>
+  <string name="prompt_google_login_failed">Google登录失败</string>
 
 
 </resources>

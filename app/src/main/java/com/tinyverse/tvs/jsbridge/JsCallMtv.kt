@@ -13,6 +13,7 @@ import com.tinyverse.tvs.BuildConfig
 import com.tinyverse.tvs.R
 import com.tinyverse.tvs.activities.BiometricLoginActivity
 import com.tinyverse.tvs.activities.FingerprintActivity
+import com.tinyverse.tvs.activities.GoogleLoginActivity
 import com.tinyverse.tvs.activities.MainActivity
 import com.tinyverse.tvs.activities.QrcodeScanActivity
 import com.tinyverse.tvs.biometric.AppUser
@@ -110,6 +111,7 @@ class JsCallMtv(private val context: Context) {
             context.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out) // 添加淡入淡出动画效果
         }
     }
+
 
     @JavascriptInterface
     fun isBiometricsSetUp(callback: Callback) {
@@ -220,6 +222,32 @@ class JsCallMtv(private val context: Context) {
         callback.success(CallbackBean(0, context.getString(R.string.app_version_number), versionName), false)
     }
 
+  @JavascriptInterface
+  fun startGoogleLogin(callback: Callback) {
+    requestCodeMap[REQUEST_CODE_GOOGLE_SIGN_IN] = callback
+    val mainActivity = context as MainActivity
+    if (context is Activity) {
+      // 进行Google登录
+      val intent = Intent(context, GoogleLoginActivity::class.java)
+      intent.putExtra("request_code", REQUEST_CODE_GOOGLE_SIGN_IN)
+      context.startActivity(intent)
+      context.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out) // 添加淡入淡出动画效果
+    }
+  }
+
+  @JavascriptInterface
+  fun startGoogleLogout(callback: Callback) {
+    requestCodeMap[REQUEST_CODE_GOOGLE_SIGN_OUT] = callback
+    val mainActivity = context as MainActivity
+    if (context is Activity) {
+      // 进行Google登出
+      val intent = Intent(context, GoogleLoginActivity::class.java)
+      intent.putExtra("request_code", REQUEST_CODE_GOOGLE_SIGN_OUT)
+      context.startActivity(intent)
+      context.overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out) // 添加淡入淡出动画效果
+    }
+  }
+
 
     // 在当前的 Activity 中执行重启操作
     private fun restartCurrentActivity(context: Context) {
@@ -238,6 +266,8 @@ class JsCallMtv(private val context: Context) {
         const val REQUEST_CODE_IS_BIOMETRIC_SET_UP: String = "1005"
         const val REQUEST_CODE_SET_UP_LANGUAGE: String = "1006"
         const val REQUEST_CODE_GET_DOWNLOAD_STATUS: String = "1007"
+        const val REQUEST_CODE_GOOGLE_SIGN_IN: String = "1008"
+        const val REQUEST_CODE_GOOGLE_SIGN_OUT: String = "1009"
         val requestCodeMap = HashMap<String, Callback>()
     }
 }

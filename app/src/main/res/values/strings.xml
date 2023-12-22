@@ -1,4 +1,6 @@
 <resources>
+    <string name="server_client_id" translatable="false">954838179345-q1c2o2l98kj615piscnhusaq0rlmg48q.apps.googleusercontent.com</string>
+    <string name="server_web_client_id" translatable="false">954838179345-fphidkh201sh59stmarmibe31v5lq5jn.apps.googleusercontent.com</string>
     <string name="app_name">TinyVerse Space</string>
     <string name="app_full_name">TinyVerse Space</string>
     <string name="action_settings">Settings</string>
@@ -107,6 +109,8 @@
     <string name="jscall_access_link_url_error">The url parameter is wrong or does not exist</string>
     <string name="jscall_access_link_url_ok">System browser successfully called</string>
     <string name="app_version_number">app version</string>
+  <string name="prompt_google_login_ok">Google sigin successful</string>
+  <string name="prompt_google_login_failed">Google sign in failed</string>
 
 
 </resources>

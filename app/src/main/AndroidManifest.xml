@@ -42,6 +42,7 @@
         <activity android:name=".activities.FullScreenActivity" />
         <activity android:name=".activities.QrcodeScanActivity" />
         <activity android:name=".activities.CrashActivity" />
+        <activity android:name=".activities.GoogleLoginActivity" />
         <activity android:name=".activities.BiometricLoginActivity" android:theme="@style/AppTheme.Transparent" android:launchMode="singleTask" />
         <service
             android:name=".service.MtvService"

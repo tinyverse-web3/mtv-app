@@ -12,6 +12,7 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
+import android.net.http.SslError
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -27,8 +28,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.webkit.DownloadListener
+import android.webkit.SslErrorHandler
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
@@ -170,7 +173,8 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(exitAppReceiver, filter)
 
         //是否要清除Cache
-        isNeedClearCache = intent.getBooleanExtra("is_need_clear_cache", true)
+        //isNeedClearCache = intent.getBooleanExtra("is_need_clear_cache", true)
+        isNeedClearCache = true
 
         // 请求存储权限
         requestStoragePermission()
@@ -356,6 +360,16 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
+            //用于debug与test，生产环境去掉，不然无法上google play
+            override fun onReceivedSslError(
+                view: WebView?,
+                handler: SslErrorHandler?,
+                error: SslError?
+            ) {
+                handler?.proceed()
+                Log.d("ssl_error-AccessUrl:", view?.url.toString());
+                Log.d("ssl_error-Details:", error.toString());
+            }
         }
 
         //添加进度条
