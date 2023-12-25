@@ -8,8 +8,8 @@ object Constants {
     const val MTV_SERVICE_APP_NAME = "mtv"
     const val MTV_SERVICE_TEST_API = "http://127.0.0.1:$MTV_SERVICE_PORT/sdk/health"
     const val MTV_SERVICE_GOOGLE_VERIFY_API = "http://127.0.0.1:$MTV_SERVICE_PORT/sdk/oauth/google"
-    const val TVS_WEB_URL= "https://test.tinyverse.space/"
-    const val TVS_WEB_VERSION_URL = "https://test.tinyverse.space/version.txt"
+    const val TVS_WEB_URL= "https://dev.tinyverse.space/"
+    const val TVS_WEB_VERSION_URL = "https://dev.tinyverse.space/version.txt"
 
 
     //const val MTV_SERVICE_TYPE = "test"

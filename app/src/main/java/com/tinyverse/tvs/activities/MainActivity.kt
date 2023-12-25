@@ -359,17 +359,6 @@ class MainActivity : AppCompatActivity() {
                     (view as? BaseWebView)?.let { inject(it, url) }
                 }
             }
-
-            //用于debug与test，生产环境去掉，不然无法上google play
-            override fun onReceivedSslError(
-                view: WebView?,
-                handler: SslErrorHandler?,
-                error: SslError?
-            ) {
-                handler?.proceed()
-                Log.d("ssl_error-AccessUrl:", view?.url.toString());
-                Log.d("ssl_error-Details:", error.toString());
-            }
         }
 
         //添加进度条
