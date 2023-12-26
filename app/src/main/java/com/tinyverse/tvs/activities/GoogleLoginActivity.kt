@@ -96,7 +96,7 @@ class GoogleLoginActivity : AppCompatActivity() {
       mGoogleSignInClient?.signOut()
         ?.addOnCompleteListener(this, object : OnCompleteListener<Void> {
           override fun onComplete(p0: Task<Void>) {
-            val toast = Toast.makeText(context, "Login account is null.", Toast.LENGTH_LONG)
+            val toast = Toast.makeText(context, "google signOut successfully.", Toast.LENGTH_LONG)
             toast.show()
             finish()
           }
