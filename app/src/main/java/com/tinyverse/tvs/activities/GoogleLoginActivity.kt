@@ -59,15 +59,16 @@ class GoogleLoginActivity : AppCompatActivity() {
 
   private fun login(account: GoogleSignInAccount?){
     if (account != null) {
-      if(account.isExpired){
+      try{
         mGoogleSignInClient?.signOut()
           ?.addOnCompleteListener(this, object : OnCompleteListener<Void> {
             override fun onComplete(p0: Task<Void>) {
               signIn()
             }
           })
-      }else{
-        returnLoginRes(activityRequestCode, account, "")
+      }catch (e: Exception){
+        Log.e("TAG", "login:signOut failed and call signIn" + e.message)
+        signIn()
       }
     } else {
       //If account == null, the user has not yet signed in to your app with Google.
